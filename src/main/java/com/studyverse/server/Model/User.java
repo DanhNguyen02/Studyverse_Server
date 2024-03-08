@@ -4,8 +4,8 @@ public class User {
     private int id;
     private String email;
     private String password;
-    private String firstname;
-    private String lastname;
+    private String firstName;
+    private String lastName;
     private String phone;
     private String avatar;
     private boolean userStatus;
@@ -17,16 +17,35 @@ public class User {
 
     }
 
-    public User(int id, String email, String password, String firstname, String lastname, String phone, String avatar, boolean userStatus, boolean accountStatus) {
+    public User(int id, String email, String password, String firstName, String lastName, String phone, String avatar, boolean userStatus, boolean accountStatus) {
         this.id = id;
         this.email = email;
         this.password = password;
-        this.firstname = firstname;
-        this.lastname = lastname;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.phone = phone;
         this.avatar = avatar;
         this.userStatus = userStatus;
         this.accountStatus = accountStatus;
+    }
+
+    public User(int id, String email, String firstName, String lastName, String phone, String avatar, int familyId) {
+        this.id = id;
+        this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phone = phone;
+        this.avatar = avatar;
+        this.familyId = familyId;
+    }
+
+    public User(int id, String email, String firstName, String lastName, String phone, String avatar) {
+        this.id = id;
+        this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phone = phone;
+        this.avatar = avatar;
     }
 
     public User(String email, String password) {
@@ -64,20 +83,20 @@ public class User {
         this.password = password;
     }
 
-    public String getFirstname() {
-        return firstname;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public String getLastname() {
-        return lastname;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getPhone() {

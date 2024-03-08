@@ -10,11 +10,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class UserDAO {
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    private Map<String, Integer> otpList = new HashMap<>();
     public boolean handleLogIn(String email, String password) {
         String sql = "select * from user where email = ? and password = ?";
         List<User> users = jdbcTemplate.query(
@@ -73,5 +76,18 @@ public class UserDAO {
         String sql = "SELECT COUNT(*) FROM user WHERE email = ?";
         int count = jdbcTemplate.queryForObject(sql, Integer.class, email);
         return count > 0;
+    }
+
+    public void updateOTPNumber(String email, Integer otpNumber) {
+        otpList.put(email, otpNumber);
+    }
+
+    public Integer getOTPNumber(String email) {
+        return otpList.getOrDefault(email, null);
+    }
+
+    public void updateNewPassword(String email, String newPassword) {
+        String sql = "update user set password = ? where email = ?";
+        jdbcTemplate.update(sql, newPassword, email);
     }
 }
