@@ -73,14 +73,14 @@ public class FamilyController {
         return response;
     }
 
-    @GetMapping("/getFamilyMembers")
-    public Map<String, Object> getFamilyMembers(@RequestBody HashMap<String, String> body) {
+    @GetMapping("/getFamilyMembers/{familyId}")
+    public Map<String, Object> getFamilyMembers(@PathVariable Integer familyId) {
         Map<String, Object> response = new HashMap<>();
 
-        String familyId = body.get("familyId");
+//        String familyId = body.get("familyId");
 //        String email = body.get("email");
 
-        List<User> familyMembers = familyDAO.getFamilyMembers(familyId);
+        List<User> familyMembers = familyDAO.getFamilyMembers(familyId.toString());
 //        List<User> pendingUsers = familyDAO.getPendingUsers(familyId, email);
 
         response.put("msg", "1");
