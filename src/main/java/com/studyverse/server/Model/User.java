@@ -16,6 +16,7 @@ public class User {
     private Date lastLogin;
     private int familyId;
     private String nickName;
+    private String role;
 
     public User() {
 
@@ -182,5 +183,13 @@ public class User {
 
     public void setDob(Date dob) {
         this.dob = dob;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }
