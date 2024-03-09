@@ -39,7 +39,12 @@ public class UserDAO {
             }
         );
         if (users.isEmpty()) return null;
-        return users.get(0);
+
+        User user = users.get(0);
+        String childrenSql = "select count(*) from user inner join children on user.id = children.id where user.id = ?";
+        Integer count = jdbcTemplate.queryForObject(childrenSql, Integer.class, user.getId());
+        user.setRole(count != null && count == 1 ? "children" : "parent");
+        return user;
     }
 
     public List<User> getAllUsers() {
