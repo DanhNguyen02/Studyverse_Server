@@ -1,17 +1,21 @@
 package com.studyverse.server.Model;
 
+import java.util.Date;
+
 public class User {
     private int id;
     private String email;
     private String password;
     private String firstName;
     private String lastName;
+    private Date dob;
     private String phone;
     private String avatar;
     private boolean userStatus;
     private boolean accountStatus;
-    private String lastLogin;
+    private Date lastLogin;
     private int familyId;
+    private String nickName;
 
     public User() {
 
@@ -48,9 +52,26 @@ public class User {
         this.avatar = avatar;
     }
 
+    public User(int id, String email, String firstName, String lastName, String phone, String avatar, Date lastLogin, String nickName) {
+        this.id = id;
+        this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phone = phone;
+        this.avatar = avatar;
+        this.lastLogin = lastLogin;
+        this.nickName = nickName;
+    }
+
     public User(String email, String password) {
         this.email = email;
         this.password = password;
+    }
+
+    public User(int id, String email, int familyId) {
+        this.id = id;
+        this.email = email;
+        this.familyId = familyId;
     }
 
     public User(int id, String email, String password) {
@@ -131,11 +152,11 @@ public class User {
         this.accountStatus = accountStatus;
     }
 
-    public String getLastLogin() {
+    public Date getLastLogin() {
         return lastLogin;
     }
 
-    public void setLastLogin(String lastLogin) {
+    public void setLastLogin(Date lastLogin) {
         this.lastLogin = lastLogin;
     }
 
@@ -145,5 +166,21 @@ public class User {
 
     public void setFamilyId(int familyId) {
         this.familyId = familyId;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
+
+    public Date getDob() {
+        return dob;
+    }
+
+    public void setDob(Date dob) {
+        this.dob = dob;
     }
 }
