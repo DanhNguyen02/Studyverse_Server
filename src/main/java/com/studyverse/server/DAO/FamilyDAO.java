@@ -149,6 +149,7 @@ public class FamilyDAO {
     }
 
     public List<User> getFamilyMembers(String familyId) {
+        if (familyId.equals("0")) return new ArrayList<>();
         String sql = "select * from user where family_id = ?";
         return jdbcTemplate.query(
             sql,

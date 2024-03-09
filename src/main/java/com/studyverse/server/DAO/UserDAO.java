@@ -29,7 +29,7 @@ public class UserDAO {
                 user.setDob(rs.getDate("dob"));
                 user.setPhone(rs.getString("phone"));
                 user.setAvatar(rs.getString("avatar"));
-                user.setUserStatus(rs.getBoolean("user_status"));
+                user.setUserStatus(rs.getString("user_status"));
                 user.setAccountStatus(rs.getBoolean("account_status"));
                 user.setLastLogin(rs.getDate("last_login"));
                 user.setFamilyId(rs.getInt("family_id"));

@@ -90,7 +90,7 @@ public class FamilyController {
         return response;
     }
 
-    @GetMapping("/getPendingUsers")
+    @PostMapping("/getPendingUsers")
     public Map<String, Object> getPendingMembers(@RequestBody HashMap<String, String> body) {
         Map<String, Object> response = new HashMap<>();
 
