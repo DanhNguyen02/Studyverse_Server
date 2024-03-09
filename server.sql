@@ -11,7 +11,7 @@
  Target Server Version : 50742
  File Encoding         : 65001
 
- Date: 08/03/2024 15:37:00
+ Date: 09/03/2024 17:46:42
 */
 
 SET NAMES utf8mb4;
@@ -33,6 +33,24 @@ INSERT INTO `children` VALUES (3);
 INSERT INTO `children` VALUES (6);
 
 -- ----------------------------
+-- Table structure for event
+-- ----------------------------
+DROP TABLE IF EXISTS `event`;
+CREATE TABLE `event`  (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL,
+  `time_start` datetime NULL DEFAULT NULL,
+  `time_end` datetime NULL DEFAULT NULL,
+  `note` varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of event
+-- ----------------------------
+INSERT INTO `event` VALUES (1, 'LCK', '2024-03-09 15:00:00', '2024-03-09 17:00:08', 'T1 vo dich');
+
+-- ----------------------------
 -- Table structure for family
 -- ----------------------------
 DROP TABLE IF EXISTS `family`;
@@ -47,7 +65,8 @@ CREATE TABLE `family`  (
 -- ----------------------------
 -- Records of family
 -- ----------------------------
-INSERT INTO `family` VALUES (1, NULL, NULL, 'b@gmail.com');
+INSERT INTO `family` VALUES (1, 'Ri cha', 'siuu', 'b@gmail.com');
+INSERT INTO `family` VALUES (2, NULL, NULL, 'a@gmail.com');
 
 -- ----------------------------
 -- Table structure for linking_family
@@ -65,6 +84,8 @@ CREATE TABLE `linking_family`  (
 -- ----------------------------
 -- Records of linking_family
 -- ----------------------------
+INSERT INTO `linking_family` VALUES (2, 4);
+INSERT INTO `linking_family` VALUES (2, 6);
 
 -- ----------------------------
 -- Table structure for parent
@@ -101,6 +122,7 @@ CREATE TABLE `user`  (
   `account_status` binary(255) NULL DEFAULT NULL,
   `last_login` datetime NULL DEFAULT NULL,
   `family_id` int(11) UNSIGNED NULL DEFAULT 0,
+  `nickname` varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `unique_email`(`email`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
@@ -108,12 +130,12 @@ CREATE TABLE `user`  (
 -- ----------------------------
 -- Records of user
 -- ----------------------------
-INSERT INTO `user` VALUES (1, 'a@gmail.com', 'a', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-INSERT INTO `user` VALUES (2, 'b@gmail.com', 'siuu', 'Ri Cha', 'Kim', '2024-01-01', '0123456789', NULL, NULL, NULL, NULL, 1);
-INSERT INTO `user` VALUES (3, 'c@gmail.com', 'b', 'Ri Cha', 'Kim', '2024-01-01', '0123456789', NULL, NULL, NULL, NULL, 0);
-INSERT INTO `user` VALUES (4, 'd@gmail.com', 'Studyverse123', 'Cha', 'Ri', '2024-02-08', '0938469314', NULL, NULL, NULL, NULL, 0);
-INSERT INTO `user` VALUES (5, 'abc@gmail.com', 'Studyverse123', 'Verse', 'Study', '2023-12-23', '0909294562', NULL, NULL, NULL, NULL, 0);
-INSERT INTO `user` VALUES (6, 'cc@gmail.com', 'b', 'Ri Cha', 'Kim', '2024-01-01', '0123456789', NULL, NULL, NULL, NULL, 0);
-INSERT INTO `user` VALUES (7, 'huudanhnguyen02@gmail.com', 'Camonvidaden2002', 'Danh', 'Nguyen', '2002-08-15', '0938469314', NULL, NULL, NULL, NULL, 0);
+INSERT INTO `user` VALUES (1, 'a@gmail.com', 'a', 'Lionel', 'Messi', '2024-01-01', '0123456789', NULL, NULL, NULL, NULL, 2, 'GOAT');
+INSERT INTO `user` VALUES (2, 'b@gmail.com', 'siuu', 'Ri Cha', 'Kim', '2024-01-01', '0123456789', NULL, NULL, NULL, NULL, 1, NULL);
+INSERT INTO `user` VALUES (3, 'c@gmail.com', 'b', 'Ri Cha', 'Kim', '2024-01-01', '0123456789', NULL, NULL, NULL, NULL, 2, NULL);
+INSERT INTO `user` VALUES (4, 'd@gmail.com', 'Studyverse123', 'Cha', 'Ri', '2024-02-08', '0938469314', NULL, NULL, NULL, NULL, 0, NULL);
+INSERT INTO `user` VALUES (5, 'abc@gmail.com', 'Studyverse123', 'Verse', 'Study', '2023-12-23', '0909294562', NULL, NULL, NULL, NULL, 0, NULL);
+INSERT INTO `user` VALUES (6, 'cc@gmail.com', 'b', 'Ri Cha', 'Kim', '2024-01-01', '0123456789', NULL, NULL, NULL, NULL, 0, NULL);
+INSERT INTO `user` VALUES (7, 'huudanhnguyen02@gmail.com', 'Camonvidaden2002', 'Danh', 'Nguyen', '2002-08-15', '0938469314', NULL, NULL, NULL, NULL, 0, NULL);
 
 SET FOREIGN_KEY_CHECKS = 1;
