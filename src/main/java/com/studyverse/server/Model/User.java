@@ -11,7 +11,7 @@ public class User {
     private Date dob;
     private String phone;
     private String avatar;
-    private boolean userStatus;
+    private String userStatus;
     private boolean accountStatus;
     private Date lastLogin;
     private int familyId;
@@ -22,7 +22,7 @@ public class User {
 
     }
 
-    public User(int id, String email, String password, String firstName, String lastName, String phone, String avatar, boolean userStatus, boolean accountStatus) {
+    public User(int id, String email, String password, String firstName, String lastName, String phone, String avatar, String userStatus, boolean accountStatus) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -137,11 +137,11 @@ public class User {
         this.avatar = avatar;
     }
 
-    public boolean isUserStatus() {
+    public String isUserStatus() {
         return userStatus;
     }
 
-    public void setUserStatus(boolean userStatus) {
+    public void setUserStatus(String userStatus) {
         this.userStatus = userStatus;
     }
 

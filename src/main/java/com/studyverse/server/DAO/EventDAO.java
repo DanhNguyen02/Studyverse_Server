@@ -20,7 +20,8 @@ public class EventDAO {
                     event.setId(rs.getInt("id"));
                     event.setName(rs.getString("name"));
                     event.setTimeStart(rs.getString("time_start"));
-                    event.setTimeEnd("time_end");
+                    event.setTimeEnd(rs.getString("time_end"));
+                    event.setNote("note");
                     return event;
                 }
         );
