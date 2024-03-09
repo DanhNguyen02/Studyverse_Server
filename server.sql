@@ -11,7 +11,7 @@
  Target Server Version : 50742
  File Encoding         : 65001
 
- Date: 08/03/2024 15:21:31
+ Date: 08/03/2024 15:37:00
 */
 
 SET NAMES utf8mb4;
@@ -27,6 +27,12 @@ CREATE TABLE `children`  (
 ) ENGINE = InnoDB CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
+-- Records of children
+-- ----------------------------
+INSERT INTO `children` VALUES (3);
+INSERT INTO `children` VALUES (6);
+
+-- ----------------------------
 -- Table structure for family
 -- ----------------------------
 DROP TABLE IF EXISTS `family`;
@@ -37,6 +43,11 @@ CREATE TABLE `family`  (
   `email` varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of family
+-- ----------------------------
+INSERT INTO `family` VALUES (1, NULL, NULL, 'b@gmail.com');
 
 -- ----------------------------
 -- Table structure for linking_family
@@ -52,6 +63,10 @@ CREATE TABLE `linking_family`  (
 ) ENGINE = InnoDB CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
+-- Records of linking_family
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for parent
 -- ----------------------------
 DROP TABLE IF EXISTS `parent`;
@@ -59,6 +74,15 @@ CREATE TABLE `parent`  (
   `id` int(11) NOT NULL,
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of parent
+-- ----------------------------
+INSERT INTO `parent` VALUES (1);
+INSERT INTO `parent` VALUES (2);
+INSERT INTO `parent` VALUES (4);
+INSERT INTO `parent` VALUES (5);
+INSERT INTO `parent` VALUES (7);
 
 -- ----------------------------
 -- Table structure for user
@@ -80,5 +104,16 @@ CREATE TABLE `user`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `unique_email`(`email`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of user
+-- ----------------------------
+INSERT INTO `user` VALUES (1, 'a@gmail.com', 'a', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
+INSERT INTO `user` VALUES (2, 'b@gmail.com', 'siuu', 'Ri Cha', 'Kim', '2024-01-01', '0123456789', NULL, NULL, NULL, NULL, 1);
+INSERT INTO `user` VALUES (3, 'c@gmail.com', 'b', 'Ri Cha', 'Kim', '2024-01-01', '0123456789', NULL, NULL, NULL, NULL, 0);
+INSERT INTO `user` VALUES (4, 'd@gmail.com', 'Studyverse123', 'Cha', 'Ri', '2024-02-08', '0938469314', NULL, NULL, NULL, NULL, 0);
+INSERT INTO `user` VALUES (5, 'abc@gmail.com', 'Studyverse123', 'Verse', 'Study', '2023-12-23', '0909294562', NULL, NULL, NULL, NULL, 0);
+INSERT INTO `user` VALUES (6, 'cc@gmail.com', 'b', 'Ri Cha', 'Kim', '2024-01-01', '0123456789', NULL, NULL, NULL, NULL, 0);
+INSERT INTO `user` VALUES (7, 'huudanhnguyen02@gmail.com', 'Camonvidaden2002', 'Danh', 'Nguyen', '2002-08-15', '0938469314', NULL, NULL, NULL, NULL, 0);
 
 SET FOREIGN_KEY_CHECKS = 1;

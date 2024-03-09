@@ -26,10 +26,19 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public Map<String, String> logIn(@RequestBody HashMap<String, String> body) {
-        System.out.println(body);
-        Map<String, String> response = new HashMap<>();
-        response.put("msg", userDAO.handleLogIn(body.get("email"), body.get("password")) ? "1" : "0");
+    public Map<String, Object> logIn(@RequestBody HashMap<String, String> body) {
+        Map<String, Object> response = new HashMap<>();
+
+        String email = body.get("email");
+        String password = body.get("password");
+
+        User user = userDAO.handleLogIn(email, password);
+        if (user == null) response.put("msg", "0");
+        else {
+            response.put("msg", "1");
+            response.put("data", user);
+        }
+
         return response;
     }
 
@@ -85,6 +94,14 @@ public class UserController {
         userDAO.updateNewPassword(email, newPassword);
 
         response.put("msg", "1");
+        return response;
+    }
+
+    @PostMapping("/updateInfo")
+    public Map<String, String> updateInfo(@RequestBody HashMap<String, String> body) {
+        Map<String, String> response = new HashMap<>();
+
+        response.put("msg", userDAO.updateUserInfo(body) ? "1" : "0");
         return response;
     }
 }

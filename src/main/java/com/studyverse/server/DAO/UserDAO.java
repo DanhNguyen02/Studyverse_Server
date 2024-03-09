@@ -3,14 +3,10 @@ package com.studyverse.server.DAO;
 import com.studyverse.server.Model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 public class UserDAO {
@@ -18,7 +14,8 @@ public class UserDAO {
     private JdbcTemplate jdbcTemplate;
 
     private Map<String, Integer> otpList = new HashMap<>();
-    public boolean handleLogIn(String email, String password) {
+
+    public User handleLogIn(String email, String password) {
         String sql = "select * from user where email = ? and password = ?";
         List<User> users = jdbcTemplate.query(
             sql,
@@ -27,13 +24,22 @@ public class UserDAO {
                 User user = new User();
                 user.setId(rs.getInt("id"));
                 user.setEmail(rs.getString("email"));
-                user.setPassword(rs.getString("password"));
+                user.setFirstName(rs.getString("firstname"));
+                user.setLastName(rs.getString("lastname"));
+                user.setDob(rs.getDate("dob"));
+                user.setPhone(rs.getString("phone"));
+                user.setAvatar(rs.getString("avatar"));
+                user.setUserStatus(rs.getBoolean("user_status"));
+                user.setAccountStatus(rs.getBoolean("account_status"));
+                user.setLastLogin(rs.getDate("last_login"));
+                user.setFamilyId(rs.getInt("family_id"));
+                user.setNickName(rs.getString("nickname"));
                 // Set other fields if needed
                 return user;
             }
         );
-
-        return !users.isEmpty();
+        if (users.isEmpty()) return null;
+        return users.get(0);
     }
 
     public List<User> getAllUsers() {
@@ -89,5 +95,53 @@ public class UserDAO {
     public void updateNewPassword(String email, String newPassword) {
         String sql = "update user set password = ? where email = ?";
         jdbcTemplate.update(sql, newPassword, email);
+    }
+
+    public boolean updateUserInfo(HashMap<String, String> body) {
+        String email = body.get("email");
+        String firstName = body.get("firstName");
+        String lastName = body.get("lastName");
+        String phoneNumber = body.get("phoneNumber");
+        String birthday = body.get("birthday");
+        String nickName = body.get("nickName");
+
+        List<String> updateFields = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
+        if (firstName != null) {
+            updateFields.add("firstname = ?");
+            params.add(firstName);
+        }
+        if (lastName != null) {
+            updateFields.add("lastname = ?");
+            params.add(lastName);
+        }
+        if (phoneNumber != null) {
+            updateFields.add("phone = ?");
+            params.add(phoneNumber);
+        }
+        if (birthday != null) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                Date dob = sdf.parse(birthday);
+                updateFields.add("dob = ?");
+                params.add(dob);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (nickName != null) {
+            updateFields.add("nickname = ?");
+            params.add(nickName);
+        }
+
+        params.add(email);
+        Object[] paramsArray = params.toArray();
+
+        String updateFieldsString = String.join(",", updateFields);
+
+        String sql = "update user set " + updateFieldsString + " where email = ?";
+        int rowsAffected = jdbcTemplate.update(sql, paramsArray);
+        return rowsAffected != 0;
     }
 }

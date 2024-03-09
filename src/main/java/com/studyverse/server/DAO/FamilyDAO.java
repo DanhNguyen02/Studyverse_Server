@@ -1,5 +1,6 @@
 package com.studyverse.server.DAO;
 
+import com.studyverse.server.Model.Family;
 import com.studyverse.server.Model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,6 +14,47 @@ public class FamilyDAO {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    public Family getFamilyById(Integer id) {
+        String sql = "select * from family where id = ?";
+        List<Family> families = jdbcTemplate.query(
+            sql,
+            new Object[]{id},
+            (rs, rowNum) -> {
+                Family family = new Family();
+                family.setId(rs.getInt("id"));
+                family.setName(rs.getString("name"));
+                family.setAvatar(rs.getString("avatar"));
+                family.setEmail(rs.getString("email"));
+                return family;
+            }
+        );
+        if (families.isEmpty()) return null;
+        return families.get(0);
+    }
+
+    public boolean checkUserExistsAndNotInFamily(String email) {
+        User user = getUserByEmail(email);
+        if (user == null) return false;
+        return user.getFamilyId() == 0;
+    }
+
+    public User getUserByEmail(String email) {
+        String sql = "SELECT * FROM user WHERE email = ?";
+        List<User> users = jdbcTemplate.query(
+            sql,
+            new Object[]{email},
+            (rs, rowNum) -> {
+                User user = new User();
+                user.setId(rs.getInt("id"));
+                user.setEmail(rs.getString("email"));
+                user.setFamilyId(rs.getInt("family_id"));
+                return user;
+            }
+        );
+        if (users.isEmpty()) return null;
+        return users.get(0);
+    }
+
     public Integer countFamily() {
         String sql = "select count(*) from family";
         return jdbcTemplate.queryForObject(sql, Integer.class);
@@ -23,11 +65,40 @@ public class FamilyDAO {
         return jdbcTemplate.queryForObject(sql, new Object[]{email}, Integer.class);
     }
 
-    public Integer getFamilyIdByEmail(String email) {
-        String sql = "select family_id from user where email = ?";
-        Integer familyId = jdbcTemplate.queryForObject(sql, new Object[]{email}, Integer.class);
-        if (familyId == null) return 0;
-        return familyId;
+    public Family getFamilyByEmail(String email) {
+        String sql = "select * from family where email = ?";
+        List<Family> families = jdbcTemplate.query(
+            sql,
+            new Object[]{email},
+            (rs, rowNum) -> {
+                Family family = new Family();
+                family.setId(rs.getInt("id"));
+                family.setName(rs.getString("name"));
+                family.setAvatar(rs.getString("avatar"));
+                family.setEmail(rs.getString("email"));
+                return family;
+            }
+        );
+        if (families.isEmpty()) return null;
+        return families.get(0);
+    }
+
+    public Family getFamilyById(String id) {
+        String sql = "select * from family where id = ?";
+        List<Family> families = jdbcTemplate.query(
+            sql,
+            new Object[]{id},
+            (rs, rowNum) -> {
+                Family family = new Family();
+                family.setId(rs.getInt("id"));
+                family.setName(rs.getString("name"));
+                family.setAvatar(rs.getString("avatar"));
+                family.setEmail(rs.getString("email"));
+                return family;
+            }
+        );
+        if (families.isEmpty()) return null;
+        return families.get(0);
     }
 
     public boolean handleCheckExistFamily(String email) {
@@ -36,12 +107,19 @@ public class FamilyDAO {
         return familyId != 0;
     }
 
-    public void handleCreateFamily(String email) {
+    public boolean handleCreateFamily(String email) {
+        boolean checkUser = checkUserExistsAndNotInFamily(email);
+        if (!checkUser) return false;
+
         String sql = "insert into family (id, email) values (?, ?)";
         int id = countFamily() + 1;
-        jdbcTemplate.update(sql, id, email);
+        int rowsAffected = jdbcTemplate.update(sql, id, email);
 
-        handleJoinFamily(id, email);
+        if (rowsAffected > 0) {
+            handleJoinFamily(id, email);
+            return true;
+        }
+        return false;
     }
 
     public void handleJoinFamily(int familyId, String email) {
@@ -49,36 +127,50 @@ public class FamilyDAO {
         jdbcTemplate.update(sql, familyId, email);
     }
 
-    public boolean handleLinkFamily(String userId, String familyEmail) {
-        int familyId = getFamilyIdByEmail(familyEmail);
-        if (familyId == 0) return false;
+    public boolean handleLinkFamily(String email, String familyEmail) {
+        Family family = getFamilyByEmail(familyEmail);
+        if (family == null || family.getId() == 0) return false;
+
+        User user = getUserByEmail(email);
+        if (user == null || user.getFamilyId() != 0) return false;
 
         String sql = "insert into linking_family (family_id, user_id) values (?, ?)";
-        jdbcTemplate.update(sql, familyId, userId);
+        jdbcTemplate.update(sql, family.getId(), user.getId());
         return true;
     }
 
+    public boolean handleUnlinkFamily(String email) {
+        User user = getUserByEmail(email);
+        if (user == null || user.getFamilyId() != 0) return false;
+
+        String sql = "delete from linking_family where user_id = ?";
+        int affectedRows = jdbcTemplate.update(sql, user.getId());
+        return affectedRows != 0;
+    }
+
     public List<User> getFamilyMembers(String familyId) {
-        String sql = "select * " +
-                "from user " +
-                "inner join family on user.family_id = family.id" +
-                "where user.family_id = " + familyId;
-        return jdbcTemplate.query(sql, (rs, rowNum) ->
-                new User(rs.getInt("id"),
-                        rs.getString("email"),
-                        rs.getString("firstname"),
-                        rs.getString("lastname"),
-                        rs.getString("phone"),
-                        rs.getString("avatar")));
+        String sql = "select * from user where family_id = ?";
+        return jdbcTemplate.query(
+            sql,
+            new Object[]{familyId},
+            (rs, rowNum) ->
+            new User(rs.getInt("id"),
+                rs.getString("email"),
+                rs.getString("firstname"),
+                rs.getString("lastname"),
+                rs.getString("phone"),
+                rs.getString("avatar"),
+                rs.getDate("last_login"),
+                rs.getString("nickname"))
+        );
     }
 
     public List<User> getPendingUsers(String familyId, String email) {
-        String checkHostFamilySql = "select * from family where id = ? and email = ?";
-        Integer count = jdbcTemplate.queryForObject(
-                checkHostFamilySql,
-                new Object[]{familyId, email},
-                Integer.class);
-        if (count != null && count == 0) return new ArrayList<>();
+        User user = getUserByEmail(email);
+        if (user == null || user.getFamilyId() != Integer.parseInt(familyId)) return null;
+
+        Family family = getFamilyById(familyId);
+        if (family == null || !user.getEmail().equals(family.getEmail())) return null;
 
         String linkingFamilySql = "select * " +
                 "from user " +
@@ -90,17 +182,58 @@ public class FamilyDAO {
                         rs.getString("firstname"),
                         rs.getString("lastname"),
                         rs.getString("phone"),
-                        rs.getString("avatar")));
+                        rs.getString("avatar"),
+                        rs.getDate("last_login"),
+                        rs.getString("nickname")
+                )
+        );
     }
 
-    public boolean handleApproveMember(String userId, String familyId, String code) {
+    public boolean handleApproveLinkFamily(String email, String familyId, String code) {
+        User user = getUserByEmail(email);
+        if (user == null || user.getFamilyId() != 0) return false;
+
         String linkingSql = "delete from linking_family where family_id = ? and user_id = ?";
-        int affectedRows = jdbcTemplate.update(linkingSql,familyId, userId);
+        int affectedRows = jdbcTemplate.update(linkingSql, familyId, user.getId());
         if (affectedRows == 0) return false;
 
         if (code.equals("1")) {
             String addToFamilySql = "update user set family_id = ? where id = ?";
-            jdbcTemplate.update(addToFamilySql, familyId, userId);
+            jdbcTemplate.update(addToFamilySql, familyId, user.getId());
+        }
+        return true;
+    }
+
+    public boolean handleKickMember(String userEmail, String memberEmail, String familyId) {
+        User hostFamily = getUserByEmail(userEmail);
+        if (hostFamily == null || hostFamily.getFamilyId() != Integer.parseInt(familyId)) return false;
+
+        User member = getUserByEmail(memberEmail);
+        if (member == null || member.getFamilyId() != Integer.parseInt(familyId)) return false;
+
+        String sql = "update user set family_id = 0 where id = ?";
+        int rowsAffected = jdbcTemplate.update(sql, member.getId());
+
+        return rowsAffected != 0;
+    }
+
+    public boolean handleOutFamily(String email) {
+        User user = getUserByEmail(email);
+        if (user == null || user.getFamilyId() == 0) return false;
+
+        Family family = getFamilyById(user.getFamilyId());
+        if (family == null) return false;
+
+        if (user.getEmail().equals(family.getEmail())) {
+            String updateUserSql = "update user set family_id = 0 where family_id = ?";
+            jdbcTemplate.update(updateUserSql, family.getId());
+
+            String deleteFamilySql = "delete from family where id = ?";
+            jdbcTemplate.update(deleteFamilySql, family.getId());
+        }
+        else {
+            String updateUserSql = "update user set family_id = 0 where id = ?";
+            jdbcTemplate.update(updateUserSql, user.getId());
         }
         return true;
     }
