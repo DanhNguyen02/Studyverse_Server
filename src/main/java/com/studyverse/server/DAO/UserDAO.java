@@ -34,17 +34,13 @@ public class UserDAO {
                 user.setLastLogin(rs.getDate("last_login"));
                 user.setFamilyId(rs.getInt("family_id"));
                 user.setNickName(rs.getString("nickname"));
+                user.setRole(rs.getBoolean("role") ? "parent" : "children");
                 // Set other fields if needed
                 return user;
             }
         );
         if (users.isEmpty()) return null;
-
-        User user = users.get(0);
-        String childrenSql = "select count(*) from user inner join children on user.id = children.id where user.id = ?";
-        Integer count = jdbcTemplate.queryForObject(childrenSql, Integer.class, user.getId());
-        user.setRole(count != null && count == 1 ? "children" : "parent");
-        return user;
+        return users.get(0);
     }
 
     public List<User> getAllUsers() {
@@ -57,7 +53,7 @@ public class UserDAO {
 
         int newId = getAllUsers().size() + 1;
 
-        String userSql = "insert into user(id, email, password, firstname, lastname, dob, phone) values(?, ?, ?, ?, ?, ?, ?)";
+        String userSql = "insert into user(id, email, password, firstname, lastname, dob, phone, nickname, role) values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         try {
             Date dob = sdf.parse(user.get("dob"));
@@ -68,18 +64,20 @@ public class UserDAO {
                     user.get("firstName"),
                     user.get("lastName"),
                     dob,
-                    user.get("phoneNumber"));
+                    user.get("phoneNumber"),
+                    user.get("firstName") + " " + user.get("lastName"),
+                    user.get("signUpType").equals("parent") ? 1 : 0);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (user.get("signUpType").equals("Parent")) {
-            String parentSql = "insert into parent(id) values(?)";
-            jdbcTemplate.update(parentSql, newId);
-        }
-        else {
-            String childrenSql = "insert into children(id) values(?)";
-            jdbcTemplate.update(childrenSql, newId);
-        }
+//        if (user.get("signUpType").equals("Parent")) {
+//            String parentSql = "insert into parent(id) values(?)";
+//            jdbcTemplate.update(parentSql, newId);
+//        }
+//        else {
+//            String childrenSql = "insert into children(id) values(?)";
+//            jdbcTemplate.update(childrenSql, newId);
+//        }
         return true;
     }
 

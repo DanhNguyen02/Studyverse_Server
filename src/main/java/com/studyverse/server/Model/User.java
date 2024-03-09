@@ -53,7 +53,7 @@ public class User {
         this.avatar = avatar;
     }
 
-    public User(int id, String email, String firstName, String lastName, String phone, String avatar, Date lastLogin, String nickName) {
+    public User(int id, String email, String firstName, String lastName, String phone, String avatar, Date lastLogin, String nickName, String role) {
         this.id = id;
         this.email = email;
         this.firstName = firstName;
@@ -62,6 +62,7 @@ public class User {
         this.avatar = avatar;
         this.lastLogin = lastLogin;
         this.nickName = nickName;
+        this.role = role;
     }
 
     public User(String email, String password) {
