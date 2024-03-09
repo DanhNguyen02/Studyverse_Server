@@ -11,7 +11,7 @@
  Target Server Version : 50742
  File Encoding         : 65001
 
- Date: 09/03/2024 21:14:47
+ Date: 09/03/2024 21:28:55
 */
 
 SET NAMES utf8mb4;
@@ -98,9 +98,9 @@ CREATE TABLE `user`  (
 -- ----------------------------
 -- Records of user
 -- ----------------------------
-INSERT INTO `user` VALUES (1, 'a@gmail.com', 'a', 'Lionel', 'Messi', '2024-01-01', '0123456789', NULL, 'Đang học anh văn', b'0', '2024-03-09 20:39:23', 2, 'GOAT', b'1');
+INSERT INTO `user` VALUES (1, 'a@gmail.com', 'a', 'Lionel', 'Messi', '2024-01-01', '0123456789', NULL, 'Đang học anh văn', b'1', NULL, 2, 'Mẹ đom dóm', b'1');
 INSERT INTO `user` VALUES (2, 'b@gmail.com', 'siuu', 'Ri Cha', 'Kim', '2024-01-01', '0123456789', NULL, 'Đang học anh văn', b'0', '2024-03-09 20:39:28', 1, NULL, b'1');
-INSERT INTO `user` VALUES (3, 'c@gmail.com', 'b', 'Ri Cha', 'Kim', '2024-01-01', '0123456789', NULL, 'Đang học anh văn', b'0', '2024-03-09 20:39:31', 2, NULL, b'0');
+INSERT INTO `user` VALUES (3, 'c@gmail.com', 'b', 'Ri Cha', 'Kim', '2024-01-01', '0123456789', NULL, 'Đang học anh văn', b'0', '2024-03-09 20:39:31', 2, 'Bé phô mai', b'0');
 INSERT INTO `user` VALUES (4, 'd@gmail.com', 'Studyverse123', 'Cha', 'Ri', '2024-02-08', '0938469314', NULL, 'Đang học anh văn', b'0', '2024-03-09 20:39:36', 0, NULL, b'1');
 INSERT INTO `user` VALUES (5, 'abc@gmail.com', 'Studyverse123', 'Verse', 'Study', '2023-12-23', '0909294562', NULL, 'Đang học anh văn', b'0', '2024-03-09 20:39:39', 0, NULL, b'1');
 INSERT INTO `user` VALUES (6, 'cc@gmail.com', 'b', 'Ri Cha', 'Kim', '2024-01-01', '0123456789', NULL, 'Đang học anh văn', b'0', '2024-03-09 20:39:43', 0, NULL, b'0');
