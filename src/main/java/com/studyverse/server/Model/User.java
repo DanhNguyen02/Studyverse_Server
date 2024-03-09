@@ -22,16 +22,21 @@ public class User {
 
     }
 
-    public User(int id, String email, String password, String firstName, String lastName, String phone, String avatar, String userStatus, boolean accountStatus) {
+    public User(int id, String email, String password, String firstName, String lastName, Date dob, String phone, String avatar, String userStatus, boolean accountStatus, Date lastLogin, int familyId, String nickName, String role) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.dob = dob;
         this.phone = phone;
         this.avatar = avatar;
         this.userStatus = userStatus;
         this.accountStatus = accountStatus;
+        this.lastLogin = lastLogin;
+        this.familyId = familyId;
+        this.nickName = nickName;
+        this.role = role;
     }
 
     public User(int id, String email, String firstName, String lastName, String phone, String avatar, int familyId) {
@@ -53,7 +58,7 @@ public class User {
         this.avatar = avatar;
     }
 
-    public User(int id, String email, String firstName, String lastName, String phone, String avatar, Date lastLogin, String nickName, String role) {
+    public User(int id, String email, String firstName, String lastName, String phone, String avatar, Date lastLogin, String nickName, String role, String userStatus, boolean accountStatus) {
         this.id = id;
         this.email = email;
         this.firstName = firstName;
@@ -63,6 +68,8 @@ public class User {
         this.lastLogin = lastLogin;
         this.nickName = nickName;
         this.role = role;
+        this.userStatus = userStatus;
+        this.accountStatus = accountStatus;
     }
 
     public User(String email, String password) {
@@ -138,7 +145,7 @@ public class User {
         this.avatar = avatar;
     }
 
-    public String isUserStatus() {
+    public String getUserStatus() {
         return userStatus;
     }
 

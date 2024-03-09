@@ -163,7 +163,9 @@ public class FamilyDAO {
                 rs.getString("avatar"),
                 rs.getDate("last_login"),
                 rs.getString("nickname"),
-                rs.getBoolean("role") ? "parent" : "children"
+                rs.getBoolean("role") ? "parent" : "children",
+                rs.getString("user_status"),
+                rs.getBoolean("account_status")
             )
         );
     }
@@ -188,7 +190,9 @@ public class FamilyDAO {
                         rs.getString("avatar"),
                         rs.getDate("last_login"),
                         rs.getString("nickname"),
-                        rs.getBoolean("role") ? "parent" : "children"
+                        rs.getBoolean("role") ? "parent" : "children",
+                        rs.getString("user_status"),
+                        rs.getBoolean("account_status")
                 )
         );
     }
