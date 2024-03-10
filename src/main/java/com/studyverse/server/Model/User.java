@@ -18,6 +18,7 @@ public class User {
     private int familyId;
     private String nickName;
     private String role;
+    private boolean isFamilyHost;
 
     public User() {
 
@@ -152,5 +153,13 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public boolean isFamilyHost() {
+        return isFamilyHost;
+    }
+
+    public void setFamilyHost(boolean familyHost) {
+        isFamilyHost = familyHost;
     }
 }

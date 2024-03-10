@@ -50,7 +50,12 @@ public class UserDAO {
         String setAccountStatusSql = "update user set account_status = 1 where email = ?";
         jdbcTemplate.update(setAccountStatusSql, email);
 
-        return users.get(0);
+        String checkHostFamilySql = "select count(*) from family where email = ?";
+        Integer count = jdbcTemplate.queryForObject(checkHostFamilySql, Integer.class, user.getEmail());
+
+        user.setFamilyHost(count != null && count > 0);
+
+        return user;
     }
 
     public boolean handleLogOut(String email) {
@@ -101,8 +106,8 @@ public class UserDAO {
 
     public boolean checkUserExists(String email) {
         String sql = "SELECT COUNT(*) FROM user WHERE email = ?";
-        int count = jdbcTemplate.queryForObject(sql, Integer.class, email);
-        return count > 0;
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, email);
+        return count != null && count > 0;
     }
 
     public void updateOTPNumber(String email, Integer otpNumber) {
