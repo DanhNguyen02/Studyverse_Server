@@ -1,5 +1,6 @@
 package com.studyverse.server.Model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class User {
@@ -13,7 +14,7 @@ public class User {
     private String avatar;
     private String userStatus;
     private boolean accountStatus;
-    private Date lastLogin;
+    private LocalDateTime lastLogin;
     private int familyId;
     private String nickName;
     private String role;
@@ -22,50 +23,13 @@ public class User {
 
     }
 
-    public User(int id, String email, String password, String firstName, String lastName, Date dob, String phone, String avatar, String userStatus, boolean accountStatus, Date lastLogin, int familyId, String nickName, String role) {
-        this.id = id;
-        this.email = email;
-        this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.dob = dob;
-        this.phone = phone;
-        this.avatar = avatar;
-        this.userStatus = userStatus;
-        this.accountStatus = accountStatus;
-        this.lastLogin = lastLogin;
-        this.familyId = familyId;
-        this.nickName = nickName;
-        this.role = role;
-    }
-
-    public User(int id, String email, String firstName, String lastName, String phone, String avatar, int familyId) {
+    public User(int id, String email, String firstName, String lastName, String phone, String avatar, String nickName, String role, String userStatus, boolean accountStatus) {
         this.id = id;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.phone = phone;
         this.avatar = avatar;
-        this.familyId = familyId;
-    }
-
-    public User(int id, String email, String firstName, String lastName, String phone, String avatar) {
-        this.id = id;
-        this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phone = phone;
-        this.avatar = avatar;
-    }
-
-    public User(int id, String email, String firstName, String lastName, String phone, String avatar, Date lastLogin, String nickName, String role, String userStatus, boolean accountStatus) {
-        this.id = id;
-        this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phone = phone;
-        this.avatar = avatar;
-        this.lastLogin = lastLogin;
         this.nickName = nickName;
         this.role = role;
         this.userStatus = userStatus;
@@ -73,18 +37,6 @@ public class User {
     }
 
     public User(String email, String password) {
-        this.email = email;
-        this.password = password;
-    }
-
-    public User(int id, String email, int familyId) {
-        this.id = id;
-        this.email = email;
-        this.familyId = familyId;
-    }
-
-    public User(int id, String email, String password) {
-        this.id = id;
         this.email = email;
         this.password = password;
     }
@@ -161,11 +113,11 @@ public class User {
         this.accountStatus = accountStatus;
     }
 
-    public Date getLastLogin() {
+    public LocalDateTime getLastLogin() {
         return lastLogin;
     }
 
-    public void setLastLogin(Date lastLogin) {
+    public void setLastLogin(LocalDateTime lastLogin) {
         this.lastLogin = lastLogin;
     }
 

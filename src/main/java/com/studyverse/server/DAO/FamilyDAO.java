@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -154,19 +155,22 @@ public class FamilyDAO {
         return jdbcTemplate.query(
             sql,
             new Object[]{familyId},
-            (rs, rowNum) ->
-            new User(rs.getInt("id"),
-                rs.getString("email"),
-                rs.getString("firstname"),
-                rs.getString("lastname"),
-                rs.getString("phone"),
-                rs.getString("avatar"),
-                rs.getDate("last_login"),
-                rs.getString("nickname"),
-                rs.getBoolean("role") ? "parent" : "children",
-                rs.getString("user_status"),
-                rs.getBoolean("account_status")
-            )
+            (rs, rowNum) -> {
+                User user = new User(rs.getInt("id"),
+                    rs.getString("email"),
+                    rs.getString("firstname"),
+                    rs.getString("lastname"),
+                    rs.getString("phone"),
+                    rs.getString("avatar"),
+                    rs.getString("nickname"),
+                    rs.getBoolean("role") ? "parent" : "children",
+                    rs.getString("user_status"),
+                    rs.getBoolean("account_status")
+                );
+                Timestamp lastLogin = rs.getTimestamp("last_login");
+                if (lastLogin != null) user.setLastLogin(lastLogin.toLocalDateTime());
+                return user;
+            }
         );
     }
 
@@ -182,18 +186,22 @@ public class FamilyDAO {
                 "inner join linking_family on user.id = linking_family.user_id " +
                 "where linking_family.family_id = " + familyId;
         return jdbcTemplate.query(linkingFamilySql, (rs, rowNum) ->
-                new User(rs.getInt("id"),
-                        rs.getString("email"),
-                        rs.getString("firstname"),
-                        rs.getString("lastname"),
-                        rs.getString("phone"),
-                        rs.getString("avatar"),
-                        rs.getDate("last_login"),
-                        rs.getString("nickname"),
-                        rs.getBoolean("role") ? "parent" : "children",
-                        rs.getString("user_status"),
-                        rs.getBoolean("account_status")
-                )
+                {
+                    User pendingUser = new User(rs.getInt("id"),
+                            rs.getString("email"),
+                            rs.getString("firstname"),
+                            rs.getString("lastname"),
+                            rs.getString("phone"),
+                            rs.getString("avatar"),
+                            rs.getString("nickname"),
+                            rs.getBoolean("role") ? "parent" : "children",
+                            rs.getString("user_status"),
+                            rs.getBoolean("account_status")
+                    );
+                    Timestamp lastLogin = rs.getTimestamp("last_login");
+                    if (lastLogin != null) pendingUser.setLastLogin(lastLogin.toLocalDateTime());
+                    return pendingUser;
+                }
         );
     }
 
