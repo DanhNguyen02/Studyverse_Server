@@ -42,6 +42,17 @@ public class UserController {
         return response;
     }
 
+    @PostMapping("/logout")
+    public Map<String, String> logOut(@RequestBody HashMap<String, String> body) {
+        Map<String, String> response = new HashMap<>();
+
+        String email = body.get("email");
+
+        response.put("msg", userDAO.handleLogOut(email) ? "1" : "0");
+
+        return response;
+    }
+
     @PostMapping("/signup")
     public Map<String, String> signUp(@RequestBody HashMap<String, String> body) {
         Map<String, String> response = new HashMap<>();

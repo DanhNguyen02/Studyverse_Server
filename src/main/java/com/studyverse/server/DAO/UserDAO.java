@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Repository
@@ -31,7 +33,8 @@ public class UserDAO {
                 user.setAvatar(rs.getString("avatar"));
                 user.setUserStatus(rs.getString("user_status"));
                 user.setAccountStatus(rs.getBoolean("account_status"));
-                user.setLastLogin(rs.getDate("last_login"));
+                Timestamp lastLogin = rs.getTimestamp("last_login");
+                if (lastLogin != null) user.setLastLogin(lastLogin.toLocalDateTime());
                 user.setFamilyId(rs.getInt("family_id"));
                 user.setNickName(rs.getString("nickname"));
                 user.setRole(rs.getBoolean("role") ? "parent" : "children");
@@ -40,7 +43,22 @@ public class UserDAO {
             }
         );
         if (users.isEmpty()) return null;
+
+        User user = users.get(0);
+        user.setAccountStatus(true);
+
+        String setAccountStatusSql = "update user set account_status = 1 where email = ?";
+        jdbcTemplate.update(setAccountStatusSql, email);
+
         return users.get(0);
+    }
+
+    public boolean handleLogOut(String email) {
+        LocalDateTime now = LocalDateTime.now();
+
+        String sql = "update user set account_status = 0, last_login = ? where email = ?";
+        int rowsAffected = jdbcTemplate.update(sql, now, email);
+        return rowsAffected != 0;
     }
 
     public List<User> getAllUsers() {
