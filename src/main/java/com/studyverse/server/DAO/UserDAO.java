@@ -71,7 +71,7 @@ public class UserDAO {
 
         int newId = getAllUsers().size() + 1;
 
-        String userSql = "insert into user(id, email, password, firstname, lastname, dob, phone, nickname, role) values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String userSql = "insert into user(id, email, password, firstname, lastname, dob, phone, nickname, role, account_status) values(?, ?, ?, ?, ?, ?, ?, ?, ?, 0)";
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         try {
             Date dob = sdf.parse(user.get("dob"));

@@ -45,7 +45,12 @@ public class FamilyController {
 
         String email = body.get("email");
 
-        response.put("msg", familyDAO.handleCreateFamily(email) ? "1" : "0");
+        int id = familyDAO.handleCreateFamily(email);
+        if (id == 0) response.put("msg", "0");
+        else {
+            response.put("msg", "1");
+            response.put("familyId", String.valueOf(id));
+        }
 
         return response;
     }

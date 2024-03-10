@@ -108,9 +108,9 @@ public class FamilyDAO {
         return familyId != 0;
     }
 
-    public boolean handleCreateFamily(String email) {
+    public int handleCreateFamily(String email) {
         boolean checkUser = checkUserExistsAndNotInFamily(email);
-        if (!checkUser) return false;
+        if (!checkUser) return 0;
 
         String sql = "insert into family (id, email) values (?, ?)";
         int id = countFamily() + 1;
@@ -118,9 +118,9 @@ public class FamilyDAO {
 
         if (rowsAffected > 0) {
             handleJoinFamily(id, email);
-            return true;
+            return id;
         }
-        return false;
+        return 0;
     }
 
     public void handleJoinFamily(int familyId, String email) {
@@ -137,16 +137,23 @@ public class FamilyDAO {
 
         String sql = "insert into linking_family (family_id, user_id) values (?, ?)";
         jdbcTemplate.update(sql, family.getId(), user.getId());
+
+        String userSql = "update user set family_id = -1 where email = ?";
+        jdbcTemplate.update(userSql, email);
         return true;
     }
 
     public boolean handleUnlinkFamily(String email) {
         User user = getUserByEmail(email);
-        if (user == null || user.getFamilyId() != 0) return false;
+        if (user == null || user.getFamilyId() != -1) return false;
 
         String sql = "delete from linking_family where user_id = ?";
         int affectedRows = jdbcTemplate.update(sql, user.getId());
-        return affectedRows != 0;
+        if (affectedRows == 0) return false;
+
+        String userSql = "update user set family_id = 0 where email = ?";
+        jdbcTemplate.update(userSql, email);
+        return true;
     }
 
     public List<User> getFamilyMembers(String familyId) {

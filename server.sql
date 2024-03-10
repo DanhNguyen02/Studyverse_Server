@@ -11,7 +11,7 @@
  Target Server Version : 50742
  File Encoding         : 65001
 
- Date: 10/03/2024 09:24:21
+ Date: 10/03/2024 10:20:46
 */
 
 SET NAMES utf8mb4;
@@ -69,8 +69,6 @@ CREATE TABLE `linking_family`  (
 -- ----------------------------
 -- Records of linking_family
 -- ----------------------------
-INSERT INTO `linking_family` VALUES (2, 4);
-INSERT INTO `linking_family` VALUES (2, 6);
 
 -- ----------------------------
 -- Table structure for user
@@ -88,7 +86,7 @@ CREATE TABLE `user`  (
   `user_status` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `account_status` bit(1) NULL DEFAULT NULL,
   `last_login` datetime NULL DEFAULT NULL,
-  `family_id` int(11) UNSIGNED NULL DEFAULT 0,
+  `family_id` int(11) NULL DEFAULT 0,
   `nickname` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `role` bit(1) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
@@ -105,5 +103,6 @@ INSERT INTO `user` VALUES (4, 'd@gmail.com', 'Studyverse123', 'Cha', 'Ri', '2024
 INSERT INTO `user` VALUES (5, 'abc@gmail.com', 'Studyverse123', 'Verse', 'Study', '2023-12-23', '0909294562', NULL, 'Đang học anh văn', b'0', '2024-03-09 20:39:39', 0, NULL, b'1');
 INSERT INTO `user` VALUES (6, 'cc@gmail.com', 'b', 'Ri Cha', 'Kim', '2024-01-01', '0123456789', NULL, 'Đang học anh văn', b'0', '2024-03-09 20:39:43', 0, NULL, b'0');
 INSERT INTO `user` VALUES (7, 'huudanhnguyen02@gmail.com', 'Camonvidaden2002', 'Danh', 'Nguyen', '2002-08-15', '0938469314', NULL, 'Đang học anh văn', b'0', '2024-03-09 20:40:05', 0, NULL, b'1');
+INSERT INTO `user` VALUES (8, 'eeee@gmail.com', 'b', 'Ri Cha', 'Kim', '2024-01-01', NULL, NULL, NULL, b'1', NULL, 0, 'Ri Cha Kim', b'0');
 
 SET FOREIGN_KEY_CHECKS = 1;
