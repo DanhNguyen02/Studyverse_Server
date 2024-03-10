@@ -172,7 +172,8 @@ public class FamilyDAO {
                     rs.getString("nickname"),
                     rs.getBoolean("role") ? "parent" : "children",
                     rs.getString("user_status"),
-                    rs.getBoolean("account_status")
+                    rs.getBoolean("account_status"),
+                    rs.getDate("dob")
                 );
                 Timestamp lastLogin = rs.getTimestamp("last_login");
                 if (lastLogin != null) user.setLastLogin(lastLogin.toLocalDateTime());
@@ -203,7 +204,8 @@ public class FamilyDAO {
                             rs.getString("nickname"),
                             rs.getBoolean("role") ? "parent" : "children",
                             rs.getString("user_status"),
-                            rs.getBoolean("account_status")
+                            rs.getBoolean("account_status"),
+                            rs.getDate("dob")
                     );
                     Timestamp lastLogin = rs.getTimestamp("last_login");
                     if (lastLogin != null) pendingUser.setLastLogin(lastLogin.toLocalDateTime());
