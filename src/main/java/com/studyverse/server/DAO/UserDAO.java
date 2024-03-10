@@ -165,4 +165,10 @@ public class UserDAO {
         int rowsAffected = jdbcTemplate.update(sql, paramsArray);
         return rowsAffected != 0;
     }
+
+    public boolean updateStatus(String email, String userStatus) {
+        String sql = "update user set user_status = ? where email = ?";
+        int rowsAffected = jdbcTemplate.update(sql, userStatus, email);
+        return rowsAffected != 0;
+    }
 }
