@@ -113,6 +113,19 @@ public class UserController {
         Map<String, String> response = new HashMap<>();
 
         response.put("msg", userDAO.updateUserInfo(body) ? "1" : "0");
+
+        return response;
+    }
+
+    @PostMapping("/updateStatus")
+    public Map<String, String> updateStatus(@RequestBody HashMap<String, String> body) {
+        Map<String, String> response = new HashMap<>();
+
+        String email = body.get("email");
+        String status = body.get("status");
+
+        response.put("msg", userDAO.updateStatus(email, status) ? "1" : "0");
+
         return response;
     }
 }

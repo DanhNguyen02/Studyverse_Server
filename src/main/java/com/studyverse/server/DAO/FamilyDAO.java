@@ -214,7 +214,7 @@ public class FamilyDAO {
 
     public boolean handleApproveLinkFamily(String email, String familyId, String code) {
         User user = getUserByEmail(email);
-        if (user == null || user.getFamilyId() != 0) return false;
+        if (user == null || user.getFamilyId() != -1) return false;
 
         String linkingSql = "delete from linking_family where family_id = ? and user_id = ?";
         int affectedRows = jdbcTemplate.update(linkingSql, familyId, user.getId());
