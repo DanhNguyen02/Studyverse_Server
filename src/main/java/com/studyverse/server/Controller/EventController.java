@@ -14,14 +14,22 @@ import java.util.Map;
 public class EventController {
     @Autowired
     private EventDAO eventDAO;
+
     @GetMapping("/events")
     public List<Event> getEvents() {
         return eventDAO.getEvents();
     }
 
+    @GetMapping("/{userId}")
+    public List<Event> getEventsUserJoin(@PathVariable("userId") Integer userId) {
+        return eventDAO.getEventsUserJoin(userId);
+    }
+
     @PostMapping("/createEvent")
-    public Map<String, String> createEvent(@RequestBody HashMap<String, String> body) {
+    public Map<String, String> createEvent(@RequestBody HashMap<String, Object> body) {
         Map<String, String> response = new HashMap<>();
+
+        response.put("msg", eventDAO.createEvent(body) ? "1" : "0");
 
         return response;
     }
