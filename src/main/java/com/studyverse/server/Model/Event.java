@@ -1,24 +1,39 @@
 package com.studyverse.server.Model;
 
+import javax.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "event")
 public class Event {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(name = "name")
     private String name;
-    private String timeStart;
-    private String timeEnd;
+
+    @Column(name = "time_start")
+    private LocalDateTime timeStart;
+
+    @Column(name = "time_end")
+    private LocalDateTime timeEnd;
+
+    @Column(name = "note")
     private String note;
 
     public Event() {
 
     }
 
-    public Event(int id, String name, String timeStart, String timeEnd) {
+    public Event(int id, String name, LocalDateTime timeStart, LocalDateTime timeEnd) {
         this.id = id;
         this.name = name;
         this.timeStart = timeStart;
         this.timeEnd = timeEnd;
     }
 
-    public Event(int id, String name, String timeStart, String timeEnd, String note) {
+    public Event(int id, String name, LocalDateTime timeStart, LocalDateTime timeEnd, String note) {
         this.id = id;
         this.name = name;
         this.timeStart = timeStart;
@@ -42,19 +57,19 @@ public class Event {
         this.name = name;
     }
 
-    public String getTimeStart() {
+    public LocalDateTime getTimeStart() {
         return timeStart;
     }
 
-    public void setTimeStart(String timeStart) {
+    public void setTimeStart(LocalDateTime timeStart) {
         this.timeStart = timeStart;
     }
 
-    public String getTimeEnd() {
+    public LocalDateTime getTimeEnd() {
         return timeEnd;
     }
 
-    public void setTimeEnd(String timeEnd) {
+    public void setTimeEnd(LocalDateTime timeEnd) {
         this.timeEnd = timeEnd;
     }
 
