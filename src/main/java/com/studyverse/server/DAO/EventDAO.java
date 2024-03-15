@@ -5,10 +5,10 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.query.NativeQuery;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigInteger;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -55,9 +55,6 @@ public class EventDAO {
                     "LEFT JOIN loop_event le ON e.id BETWEEN le.first_event_id AND le.last_event_id " +
                     "WHERE e.user_id = :userId";
 
-//            NativeQuery<Event> query = session.createNativeQuery(sql, Event.class);
-//            query.setParameter("userId", userId);
-//            events = query.getResultList();
             List<Object[]> results = session.createNativeQuery(sql)
                     .setParameter("userId", userId)
                     .getResultList();
@@ -90,8 +87,8 @@ public class EventDAO {
 
             String name = (String) body.get("name");
             String day = (String) body.get("day");
-            String timeStart = (String) body.get("timeStart");
-            String timeEnd = (String) body.get("timeEnd");
+            String timeStart = body.get("timeStart") + ":00";
+            String timeEnd = body.get("timeEnd") + ":00";
             Integer loopMode = (Integer) body.get("loopMode");
             String endDateString = (String) body.get("endDate");
             Boolean isRemind = (Boolean) body.get("isRemind");
@@ -181,46 +178,113 @@ public class EventDAO {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
 
-            Event event = session.get(Event.class, id);
+            String getEventSql = "select e.id, e.name, e.time_start, e.time_end, e.note, e.user_id, " +
+                    "COALESCE(re.time, 0) as time, " +
+                    "COALESCE(re.is_success, 0) as is_success " +
+                    "from event e left join remind_event re on e.id = re.id " +
+                    "where e.id = :id";
+            NativeQuery<Event> query = session.createNativeQuery(getEventSql, Event.class).setParameter("id", id);
+            Event event = query.list().get(0);
             if (event != null) {
                 String name = (String) body.get("name");
-                String timeStart = (String) body.get("timeStart");
-                String timeEnd = (String) body.get("timeEnd");
+                String date = (String) body.get("date");
+                String timeStart = body.get("timeStart") + ":00";
+                String timeEnd = body.get("timeEnd") + ":00";
                 Boolean isRemind = (Boolean) body.get("isRemind");
                 Integer newRemindTime = (Integer) body.get("remindTime");
                 String note = (String) body.get("note");
+                Boolean isLoop = (Boolean) body.get("isLoop");
                 Integer userId = (Integer) body.get("userId");
                 if (userId != event.getUserId()) return false;
 
-                LocalDate date = event.getTimeStart().toLocalDate();
-                System.out.println(date);
+                String getRangeSql = "select * from loop_event where :id BETWEEN first_event_id and last_event_id";
+                List<Object[]> resultList = session.createNativeQuery(getRangeSql)
+                        .setParameter("id", id)
+                        .getResultList();
+
+                Integer firstId = 0, lastId = 0;
+                if (resultList.size() == 1) {
+                    firstId = (Integer) resultList.get(0)[0];
+                    lastId = (Integer) resultList.get(0)[1];
+                }
 
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
-                event.setName(name);
-                event.setTimeStart(LocalDateTime.parse(date + " " + timeStart, formatter));
-                event.setTimeEnd(LocalDateTime.parse(date + " " + timeEnd, formatter));
-                event.setNote(note);
+                if (!isLoop) {
+                    event.setName(name);
+                    event.setTimeStart(LocalDateTime.parse(date + " " + timeStart, formatter));
+                    event.setTimeEnd(LocalDateTime.parse(date + " " + timeEnd, formatter));
+                    event.setNote(note);
 
-                session.saveOrUpdate(event);
-
-                int remindTime = event.getRemindTime();
-                String sql = "";
-                if (isRemind) {
-                    if (remindTime > 0) sql = "update remind_event set remind_time = :remindTime where id = :id";
-                    else sql = "insert into remind_event (id, remind_time) values(:id, :remindTime)";
-
-                    session.createNativeQuery(sql)
-                            .setParameter("id", id)
-                            .setParameter("remindTime", newRemindTime)
-                            .executeUpdate();
+                    session.saveOrUpdate(event);
                 }
-                else if (remindTime > 0) {
-                    sql = "delete from remind_event where id = :id";
+                else {
+                    int insertId = firstId;
+                    while (insertId <= lastId) {
+                        String hql = "update Event set name = :name, note = :note where id = :id";
+                        session.createQuery(hql)
+                                .setParameter("id", insertId)
+                                .setParameter("name", name)
+                                .setParameter("note", note)
+                                .executeUpdate();
 
-                    session.createNativeQuery(sql)
-                            .setParameter("id", id)
-                            .executeUpdate();
+                        insertId++;
+                    }
+                }
+
+                String sql;
+                if (isRemind) {
+                    if (isLoop) {
+                        if (event.getRemindTime() > 0) {
+                            sql = "update remind_event set time = :remindTime where id between :firstId and :lastId";
+
+                            session.createNativeQuery(sql)
+                                    .setParameter("remindTime", newRemindTime)
+                                    .setParameter("firstId", firstId)
+                                    .setParameter("lastId", lastId)
+                                    .executeUpdate();
+                        }
+                        else {
+                            sql = "insert into remind_event (id, time) values(:id, :remindTime)";
+
+                            int insertId = firstId;
+                            while (insertId <= lastId) {
+                                session.createNativeQuery(sql)
+                                        .setParameter("id", insertId)
+                                        .setParameter("remindTime", newRemindTime)
+                                        .executeUpdate();
+
+                                insertId++;
+                            }
+                        }
+                    }
+                    else {
+                        if (event.getRemindTime() > 0)
+                            sql = "update remind_event set time = :remindTime where id = :id";
+                        else sql = "insert into remind_event (id, time) values (:id, :remindTime)";
+
+                        session.createNativeQuery(sql)
+                                .setParameter("id", id)
+                                .setParameter("remindTime", newRemindTime)
+                                .executeUpdate();
+                    }
+                }
+                else if (event.getRemindTime() > 0) {
+                    if (isLoop) {
+                        sql = "delete from remind_event where id between :firstId and :lastId";
+
+                        session.createNativeQuery(sql)
+                                .setParameter("firstId", firstId)
+                                .setParameter("lastId", lastId)
+                                .executeUpdate();
+                    }
+                    else {
+                        sql = "delete from remind_event where id = :id";
+
+                        session.createNativeQuery(sql)
+                                .setParameter("id", id)
+                                .executeUpdate();
+                    }
                 }
             }
             else return false;
@@ -237,18 +301,39 @@ public class EventDAO {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
 
+            String getRangeSql = "select * from loop_event where :id BETWEEN first_event_id and last_event_id";
+            List<Object[]> resultList = session.createNativeQuery(getRangeSql)
+                    .setParameter("id", id)
+                    .getResultList();
+
             if (!deleteLoop) {
                 Event event = session.get(Event.class, id);
                 if (event != null) {
                     session.delete(event);
+
+                    if (resultList.size() == 1) {
+                        Integer firstId = (Integer) resultList.get(0)[0];
+                        Integer lastId = (Integer) resultList.get(0)[1];
+
+                        String hql = "select count(*) from Event where id between :firstId and :lastId";
+                        Query<Long> query = session.createQuery(hql, Long.class)
+                                .setParameter("firstId", firstId)
+                                .setParameter("lastId", lastId);
+                        Long count = query.getSingleResult();
+
+                        if (count == 0) {
+                            String sql = "delete from loop_event where first_event_id = :firstId and last_event_id = :lastId";
+
+                            session.createNativeQuery(sql)
+                                    .setParameter("firstId", firstId)
+                                    .setParameter("lastId", lastId)
+                                    .executeUpdate();
+                        }
+                    }
                 }
                 else return false;
             }
             else {
-                String getRangeSql = "select * from loop_event where :id BETWEEN first_event_id and last_event_id";
-                List<Object[]> resultList = session.createNativeQuery(getRangeSql)
-                        .setParameter("id", id)
-                        .getResultList();
                 if (resultList.size() == 1) {
                     Integer firstId = (Integer) resultList.get(0)[0];
                     Integer lastId = (Integer) resultList.get(0)[1];
