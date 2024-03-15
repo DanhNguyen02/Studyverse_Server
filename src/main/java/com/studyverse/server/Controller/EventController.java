@@ -33,4 +33,32 @@ public class EventController {
 
         return response;
     }
+
+    @PutMapping("/{id}")
+    public Map<String, String> updateEvents(@PathVariable("id") Integer id ,@RequestBody HashMap<String, Object> body) {
+        Map<String, String> response = new HashMap<>();
+
+        response.put("msg", eventDAO.updateEvents(id, body) ? "1" : "0");
+
+        return response;
+    }
+
+    @DeleteMapping("/{id}")
+    public Map<String, String> deleteEvent(@PathVariable("id") Integer id, @RequestBody HashMap<String, Object> body) {
+        Map<String, String> response = new HashMap<>();
+
+        Boolean deleteLoop = (Boolean) body.get("deleteLoop");
+        response.put("msg", eventDAO.deleteEvent(id, deleteLoop) ? "1" : "0");
+
+        return response;
+    }
+
+    @PutMapping("/{id}/updateStatus")
+    public Map<String, String> updateStatus(@PathVariable("id") Integer id) {
+        Map<String, String> response = new HashMap<>();
+
+        response.put("msg", eventDAO.updateStatus(id) ? "1" : "0");
+
+        return response;
+    }
 }

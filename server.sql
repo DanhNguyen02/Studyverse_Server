@@ -11,7 +11,7 @@
  Target Server Version : 50742
  File Encoding         : 65001
 
- Date: 13/03/2024 16:07:06
+ Date: 15/03/2024 16:49:18
 */
 
 SET NAMES utf8mb4;
@@ -27,14 +27,15 @@ CREATE TABLE `event`  (
   `time_start` datetime NULL DEFAULT NULL,
   `time_end` datetime NULL DEFAULT NULL,
   `note` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+  `user_id` int(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `user_id`(`user_id`) USING BTREE,
+  CONSTRAINT `event_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 124826 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of event
 -- ----------------------------
-INSERT INTO `event` VALUES (1, 'LCK', '2024-03-09 15:00:00', '2024-03-09 17:00:08', 'T1 vô địch');
-INSERT INTO `event` VALUES (2, 'Event', '2024-03-12 15:47:44', '2024-03-12 16:47:44', 'Nothing');
 
 -- ----------------------------
 -- Table structure for family
@@ -76,11 +77,10 @@ CREATE TABLE `linking_family`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `loop_event`;
 CREATE TABLE `loop_event`  (
-  `id` int(11) NOT NULL,
-  `loop_mode` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
-  `end_date` datetime NULL DEFAULT NULL,
-  PRIMARY KEY (`id`) USING BTREE,
-  CONSTRAINT `loop_event_ibfk_1` FOREIGN KEY (`id`) REFERENCES `event` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+  `first_event_id` int(11) NOT NULL,
+  `last_event_id` int(11) NOT NULL,
+  PRIMARY KEY (`first_event_id`, `last_event_id`) USING BTREE,
+  INDEX `last_event_id`(`last_event_id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
@@ -122,7 +122,8 @@ INSERT INTO `message` VALUES (7, 'Buồn k ông cháu ơi', b'0', 3, 1, '2024-03
 DROP TABLE IF EXISTS `remind_event`;
 CREATE TABLE `remind_event`  (
   `id` int(11) NOT NULL,
-  `remindTime` time NULL DEFAULT NULL,
+  `time` int(11) NULL DEFAULT NULL,
+  `is_success` int(1) NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE,
   CONSTRAINT `remind_event_ibfk_1` FOREIGN KEY (`id`) REFERENCES `event` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
 ) ENGINE = InnoDB CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
@@ -165,22 +166,5 @@ INSERT INTO `user` VALUES (5, 'abc@gmail.com', 'Studyverse123', 'Verse', 'Study'
 INSERT INTO `user` VALUES (6, 'cc@gmail.com', 'b', 'Ri Cha', 'Kim', '2024-01-01', '0123456789', NULL, 'Đang học anh văn', b'0', '2024-03-09 20:39:43', 0, NULL, b'0');
 INSERT INTO `user` VALUES (7, 'huudanhnguyen02@gmail.com', 'Camonvidaden2002', 'Danh', 'Nguyen', '2002-08-15', '0938469314', NULL, 'Đang học anh văn', b'0', '2024-03-09 20:40:05', 0, NULL, b'1');
 INSERT INTO `user` VALUES (8, 'eeee@gmail.com', 'b', 'Ri Cha', 'Kim', '2024-01-01', NULL, NULL, NULL, b'1', NULL, 0, 'Ri Cha Kim', b'0');
-
--- ----------------------------
--- Table structure for user_join_event
--- ----------------------------
-DROP TABLE IF EXISTS `user_join_event`;
-CREATE TABLE `user_join_event`  (
-  `event_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  PRIMARY KEY (`event_id`, `user_id`) USING BTREE,
-  INDEX `user_id`(`user_id`) USING BTREE,
-  CONSTRAINT `user_join_event_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `event` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
-  CONSTRAINT `user_join_event_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Records of user_join_event
--- ----------------------------
 
 SET FOREIGN_KEY_CHECKS = 1;
