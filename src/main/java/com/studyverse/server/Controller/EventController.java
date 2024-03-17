@@ -26,7 +26,7 @@ public class EventController {
     }
 
     @PostMapping("/createEvent")
-    public Map<String, String> createEvent(@RequestBody HashMap<String, Object> body) {
+    public Map<String, String> createEvent(@RequestBody HashMap<String, String> body) {
         Map<String, String> response = new HashMap<>();
 
         response.put("msg", eventDAO.createEvent(body) ? "1" : "0");
@@ -35,7 +35,7 @@ public class EventController {
     }
 
     @PutMapping("/{id}")
-    public Map<String, String> updateEvents(@PathVariable("id") Integer id ,@RequestBody HashMap<String, Object> body) {
+    public Map<String, String> updateEvents(@PathVariable("id") Integer id ,@RequestBody HashMap<String, String> body) {
         Map<String, String> response = new HashMap<>();
 
         response.put("msg", eventDAO.updateEvents(id, body) ? "1" : "0");
@@ -44,10 +44,10 @@ public class EventController {
     }
 
     @DeleteMapping("/{id}")
-    public Map<String, String> deleteEvent(@PathVariable("id") Integer id, @RequestBody HashMap<String, Object> body) {
+    public Map<String, String> deleteEvent(@PathVariable("id") Integer id, @RequestBody HashMap<String, String> body) {
         Map<String, String> response = new HashMap<>();
 
-        Boolean deleteLoop = (Boolean) body.get("deleteLoop");
+        Boolean deleteLoop = Boolean.parseBoolean(body.get("deleteLoop"));
         response.put("msg", eventDAO.deleteEvent(id, deleteLoop) ? "1" : "0");
 
         return response;

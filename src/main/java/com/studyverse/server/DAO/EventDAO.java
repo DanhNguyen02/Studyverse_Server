@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -81,20 +80,20 @@ public class EventDAO {
         return events;
     }
 
-    public boolean createEvent(HashMap<String, Object> body) {
+    public boolean createEvent(HashMap<String, String> body) {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
 
-            String name = (String) body.get("name");
-            String day = (String) body.get("day");
+            String name = body.get("name");
+            String day = body.get("day");
             String timeStart = body.get("timeStart") + ":00";
             String timeEnd = body.get("timeEnd") + ":00";
-            Integer loopMode = (Integer) body.get("loopMode");
-            String endDateString = (String) body.get("endDate");
-            Boolean isRemind = (Boolean) body.get("isRemind");
-            Integer remindTime = (Integer) body.get("remindTime");
-            String note = (String) body.get("note");
-            Integer userId = (Integer) body.get("userId");
+            int loopMode = Integer.parseInt(body.get("loopMode"));
+            String endDateString = body.get("endDate");
+            boolean isRemind = Boolean.parseBoolean(body.get("isRemind"));
+            int remindTime = Integer.parseInt(body.get("remindTime"));
+            String note = body.get("note");
+            int userId = Integer.parseInt(body.get("userId"));
 
             int plusDays = -1;
             int plusMonths = 0;
@@ -174,7 +173,7 @@ public class EventDAO {
         return true;
     }
 
-    public boolean updateEvents(Integer id, HashMap<String, Object> body) {
+    public boolean updateEvents(Integer id, HashMap<String, String> body) {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
 
@@ -186,15 +185,15 @@ public class EventDAO {
             NativeQuery<Event> query = session.createNativeQuery(getEventSql, Event.class).setParameter("id", id);
             Event event = query.list().get(0);
             if (event != null) {
-                String name = (String) body.get("name");
-                String date = (String) body.get("date");
+                String name = body.get("name");
+                String date = body.get("date");
                 String timeStart = body.get("timeStart") + ":00";
                 String timeEnd = body.get("timeEnd") + ":00";
-                Boolean isRemind = (Boolean) body.get("isRemind");
-                Integer newRemindTime = (Integer) body.get("remindTime");
-                String note = (String) body.get("note");
-                Boolean isLoop = (Boolean) body.get("isLoop");
-                Integer userId = (Integer) body.get("userId");
+                boolean isRemind = Boolean.parseBoolean(body.get("isRemind"));
+                int newRemindTime = Integer.parseInt(body.get("remindTime"));
+                String note = body.get("note");
+                boolean isLoop = Boolean.parseBoolean(body.get("isLoop"));
+                int userId = Integer.parseInt(body.get("userId"));
                 if (userId != event.getUserId()) return false;
 
                 String getRangeSql = "select * from loop_event where :id BETWEEN first_event_id and last_event_id";
