@@ -91,7 +91,8 @@ public class EventDAO {
             int loopMode = Integer.parseInt(body.get("loopMode"));
             String endDateString = body.get("endDate");
             boolean isRemind = Boolean.parseBoolean(body.get("isRemind"));
-            int remindTime = Integer.parseInt(body.get("remindTime"));
+            int remindTime = 0;
+            if (!body.get("remindTime").isEmpty()) remindTime = Integer.parseInt(body.get("remindTime"));
             String note = body.get("note");
             int userId = Integer.parseInt(body.get("userId"));
 
@@ -190,7 +191,8 @@ public class EventDAO {
                 String timeStart = body.get("timeStart") + ":00";
                 String timeEnd = body.get("timeEnd") + ":00";
                 boolean isRemind = Boolean.parseBoolean(body.get("isRemind"));
-                int newRemindTime = Integer.parseInt(body.get("remindTime"));
+                int newRemindTime = 0;
+                if (!body.get("remindTime").isEmpty()) newRemindTime = Integer.parseInt(body.get("remindTime"));
                 String note = body.get("note");
                 boolean isLoop = Boolean.parseBoolean(body.get("isLoop"));
                 int userId = Integer.parseInt(body.get("userId"));
