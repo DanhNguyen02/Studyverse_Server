@@ -2,12 +2,13 @@ package com.studyverse.server.Model;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "event")
-@SecondaryTable(name = "remind_event", pkJoinColumns = {
-        @PrimaryKeyJoinColumn(name = "id", referencedColumnName = "id")
-})
+//@SecondaryTable(name = "remind_event", pkJoinColumns = {
+//        @PrimaryKeyJoinColumn(name = "id", referencedColumnName = "id")
+//})
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,14 +29,19 @@ public class Event {
     @Column(name = "user_id")
     private int userId;
 
-    @Column(table = "remind_event", name = "time")
+//    @Column(table = "remind_event", name = "time")
+    @Transient
     private int remindTime;
 
-    @Column(table = "remind_event", name = "is_success")
+//    @Column(table = "remind_event", name = "is_success")
+    @Transient
     private boolean isSuccess;
 
     @Transient
     private boolean isLoop;
+
+    @Transient
+    private ArrayList<Integer> tagUsers = new ArrayList<>();
 
     public Event() {
 
@@ -126,5 +132,13 @@ public class Event {
 
     public void setLoop(boolean loop) {
         isLoop = loop;
+    }
+
+    public ArrayList<Integer> getTagUsers() {
+        return tagUsers;
+    }
+
+    public void setTagUsers(ArrayList<Integer> tagUsers) {
+        this.tagUsers = tagUsers;
     }
 }
