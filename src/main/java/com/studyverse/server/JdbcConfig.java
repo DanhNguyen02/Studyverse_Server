@@ -1,4 +1,4 @@
-package com.studyverse.server.Service;
+package com.studyverse.server;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jdbc.DataSourceBuilder;
