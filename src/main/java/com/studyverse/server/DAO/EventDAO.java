@@ -58,6 +58,8 @@ public class EventDAO {
                     .setParameter("userId", userId)
                     .getResultList();
 
+            Map<Integer, Event> eventMap = new HashMap<>();
+
             for (Object[] row : results) {
                 Event event = new Event();
                 event.setId((Integer) row[0]);
@@ -69,8 +71,27 @@ public class EventDAO {
                 event.setRemindTime(((BigInteger) row[6]).intValue());
                 event.setSuccess(((BigInteger) row[7]).intValue() == 1);
                 event.setLoop(((BigInteger) row[8]).intValue() == 1);
-                events.add(event);
+
+                eventMap.put(event.getId(), event);
             }
+
+            String sqlUserIds = "SELECT event_id, user_id FROM user_involve_event WHERE event_id IN :eventIds";
+
+            List<Object[]> userIdResults = session.createNativeQuery(sqlUserIds)
+                    .setParameter("eventIds", eventMap.keySet())
+                    .getResultList();
+
+            for (Object[] row : userIdResults) {
+                Integer eventId = (Integer) row[0];
+                Integer involveUserId = (Integer) row[1];
+
+                Event event = eventMap.get(eventId);
+                if (event != null) {
+                    event.getTagUsers().add(involveUserId);
+                }
+            }
+
+            events = new ArrayList<>(eventMap.values());
 
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -95,6 +116,16 @@ public class EventDAO {
             if (!body.get("remindTime").isEmpty()) remindTime = Integer.parseInt(body.get("remindTime"));
             String note = body.get("note");
             int userId = Integer.parseInt(body.get("userId"));
+            String tagUsersString = body.get("tagUsers");
+
+            tagUsersString = tagUsersString.replaceAll("\\[|\\]|\\s", "");
+
+            String[] stringArray = tagUsersString.split(",");
+
+            List<Integer> tagUsers = new ArrayList<>();
+            for (String s : stringArray) {
+                tagUsers.add(Integer.parseInt(s));
+            }
 
             int plusDays = -1;
             int plusMonths = 0;
@@ -164,6 +195,17 @@ public class EventDAO {
                         .setParameter("firstId", firstId)
                         .setParameter("lastId", lastId)
                         .executeUpdate();
+            }
+
+            if (!tagUsers.isEmpty()) {
+                String tagUsersSql = "insert into user_involve_event (event_id, user_id) values (:eventId, :userId)";
+
+                for (Integer tagUserId : tagUsers) {
+                    session.createNativeQuery(tagUsersSql)
+                            .setParameter("eventId", newEvent.getId())
+                            .setParameter("userId", tagUserId)
+                            .executeUpdate();
+                }
             }
 
             session.getTransaction().commit();
