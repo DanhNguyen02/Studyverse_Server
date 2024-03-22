@@ -226,6 +226,10 @@ public class FamilyDAO {
             String addToFamilySql = "update user set family_id = ? where id = ?";
             jdbcTemplate.update(addToFamilySql, familyId, user.getId());
         }
+        else if (code.equals("0")) {
+            String addToFamilySql = "update user set family_id = 0 where id = ?";
+            jdbcTemplate.update(addToFamilySql, user.getId());
+        }
         return true;
     }
 
