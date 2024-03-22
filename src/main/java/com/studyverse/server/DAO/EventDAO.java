@@ -157,11 +157,12 @@ public class EventDAO {
 
             session.save(newEvent);
 
-            if (!isRemind) {
-                String sql = "delete from remind_event where id = :id";
+            if (isRemind) {
+                String sql = "insert into remind_event (id, time, is_success) values (:id, :remindTime, 0)";
 
                 session.createNativeQuery(sql)
                         .setParameter("id", newEvent.getId())
+                        .setParameter("remindTime", remindTime)
                         .executeUpdate();
             }
 
