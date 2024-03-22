@@ -118,13 +118,15 @@ public class EventDAO {
             int userId = Integer.parseInt(body.get("userId"));
             String tagUsersString = body.get("tagUsers");
 
-            tagUsersString = tagUsersString.replaceAll("\\[|\\]|\\s", "");
-
-            String[] stringArray = tagUsersString.split(",");
-
             List<Integer> tagUsers = new ArrayList<>();
-            for (String s : stringArray) {
-                tagUsers.add(Integer.parseInt(s));
+            if (!tagUsersString.isEmpty() && !tagUsersString.equals("[]")) {
+                tagUsersString = tagUsersString.replaceAll("\\[|\\]|\\s", "");
+
+                String[] stringArray = tagUsersString.split(",");
+
+                for (String s : stringArray) {
+                    tagUsers.add(Integer.parseInt(s));
+                }
             }
 
             int plusDays = -1;
