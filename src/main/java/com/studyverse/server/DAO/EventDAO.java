@@ -392,27 +392,23 @@ public class EventDAO {
                 String sql;
                 if (isRemind) {
                     if (isLoop) {
-                        if (event.getRemindTime() > 0) {
-                            sql = "update remind_event set time = :remindTime where id between :firstId and :lastId";
+                        String deleteSql = "delete from remind_event where id between :firstId and :lastId";
 
+                        session.createNativeQuery(deleteSql)
+                                .setParameter("firstId", firstId)
+                                .setParameter("lastId", lastId)
+                                .executeUpdate();
+
+                        sql = "insert into remind_event (id, time) values(:id, :remindTime)";
+
+                        int insertId = firstId;
+                        while (insertId <= lastId) {
                             session.createNativeQuery(sql)
+                                    .setParameter("id", insertId)
                                     .setParameter("remindTime", newRemindTime)
-                                    .setParameter("firstId", firstId)
-                                    .setParameter("lastId", lastId)
                                     .executeUpdate();
-                        }
-                        else {
-                            sql = "insert into remind_event (id, time) values(:id, :remindTime)";
 
-                            int insertId = firstId;
-                            while (insertId <= lastId) {
-                                session.createNativeQuery(sql)
-                                        .setParameter("id", insertId)
-                                        .setParameter("remindTime", newRemindTime)
-                                        .executeUpdate();
-
-                                insertId++;
-                            }
+                            insertId++;
                         }
                     }
                     else {
