@@ -231,27 +231,6 @@ public class EventDAO {
                         .setParameter("lastId", lastId)
                         .executeUpdate();
             }
-            else {
-                if (isRemind) {
-                    String sql = "insert into remind_event (id, time, is_success) values (:id, :remindTime, 0)";
-
-                    session.createNativeQuery(sql)
-                            .setParameter("id", newEvent.getId())
-                            .setParameter("remindTime", remindTime)
-                            .executeUpdate();
-                }
-
-                if (!tagUsers.isEmpty()) {
-                    String tagUsersSql = "insert into user_involve_event (event_id, user_id) values (:eventId, :userId)";
-
-                    for (Integer tagUserId : tagUsers) {
-                        session.createNativeQuery(tagUsersSql)
-                                .setParameter("eventId", newEvent.getId())
-                                .setParameter("userId", tagUserId)
-                                .executeUpdate();
-                    }
-                }
-            }
 
             session.getTransaction().commit();
         } catch (Exception e) {
