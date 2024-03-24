@@ -153,50 +153,15 @@ public class EventDAO {
             newEvent.setTimeEnd(endDateTime);
             newEvent.setNote(note);
             newEvent.setUserId(userId);
-            if (isRemind) newEvent.setRemindTime(remindTime);
 
             session.save(newEvent);
 
             if (isRemind) {
-                String sql = "insert into remind_event (id, time, is_success) values (:id, :remindTime, 0)";
+                String remindSql = "insert into remind_event (id, time, is_success) values (:id, :remindTime, 0)";
 
-                session.createNativeQuery(sql)
+                session.createNativeQuery(remindSql)
                         .setParameter("id", newEvent.getId())
                         .setParameter("remindTime", remindTime)
-                        .executeUpdate();
-            }
-
-            int firstId = newEvent.getId();
-            int lastId = newEvent.getId();
-
-            // Add data to loop_event table
-            if (loopMode != 0) {
-                LocalDateTime endLoopDate = LocalDateTime.parse(endDateString + " 00:00:00", formatter);
-                while (true) {
-                    int count = lastId - firstId + 1;
-                    LocalDateTime newStartDateTime = startDateTime.plusDays((long) plusDays * count).plusMonths(plusMonths * count);
-                    LocalDateTime newEndDateTime = endDateTime.plusDays((long) plusDays * count).plusMonths(plusMonths * count);
-
-                    if (newEndDateTime.isAfter(endLoopDate)) break;
-
-                    Event event = new Event();
-
-                    event.setName(name);
-                    event.setTimeStart(newStartDateTime);
-                    event.setTimeEnd(newEndDateTime);
-                    event.setNote(note);
-                    event.setUserId(userId);
-                    if (isRemind) event.setRemindTime(remindTime);
-
-                    session.save(event);
-
-                    lastId++;
-                }
-                String sql = "insert into loop_event (first_event_id, last_event_id) values(:firstId, :lastId)";
-
-                session.createNativeQuery(sql)
-                        .setParameter("firstId", firstId)
-                        .setParameter("lastId", lastId)
                         .executeUpdate();
             }
 
@@ -208,6 +173,83 @@ public class EventDAO {
                             .setParameter("eventId", newEvent.getId())
                             .setParameter("userId", tagUserId)
                             .executeUpdate();
+                }
+            }
+
+            int firstId = newEvent.getId();
+            int lastId = newEvent.getId() + 1;
+
+            // Add data to loop_event table
+            if (loopMode != 0) {
+                LocalDateTime endLoopDate = LocalDateTime.parse(endDateString + " 00:00:00", formatter);
+                while (true) {
+                    int count = lastId - firstId;
+                    LocalDateTime newStartDateTime = startDateTime.plusDays((long) plusDays * count).plusMonths(plusMonths * count);
+                    LocalDateTime newEndDateTime = endDateTime.plusDays((long) plusDays * count).plusMonths(plusMonths * count);
+
+                    if (newEndDateTime.isAfter(endLoopDate)) {
+                        lastId--;
+                        break;
+                    }
+
+                    Event event = new Event();
+
+                    event.setName(name);
+                    event.setTimeStart(newStartDateTime);
+                    event.setTimeEnd(newEndDateTime);
+                    event.setNote(note);
+                    event.setUserId(userId);
+
+                    session.save(event);
+
+                    if (isRemind) {
+                        String remindSql = "insert into remind_event (id, time, is_success) values (:id, :remindTime, 0)";
+
+                        session.createNativeQuery(remindSql)
+                                .setParameter("id", lastId)
+                                .setParameter("remindTime", remindTime)
+                                .executeUpdate();
+                    }
+
+                    if (!tagUsers.isEmpty()) {
+                        String tagUsersSql = "insert into user_involve_event (event_id, user_id) values (:eventId, :userId)";
+
+                        for (Integer tagUserId : tagUsers) {
+                            session.createNativeQuery(tagUsersSql)
+                                    .setParameter("eventId", lastId)
+                                    .setParameter("userId", tagUserId)
+                                    .executeUpdate();
+                        }
+                    }
+
+                    lastId++;
+                }
+                String sql = "insert into loop_event (first_event_id, last_event_id) values(:firstId, :lastId)";
+
+                session.createNativeQuery(sql)
+                        .setParameter("firstId", firstId)
+                        .setParameter("lastId", lastId)
+                        .executeUpdate();
+            }
+            else {
+                if (isRemind) {
+                    String sql = "insert into remind_event (id, time, is_success) values (:id, :remindTime, 0)";
+
+                    session.createNativeQuery(sql)
+                            .setParameter("id", newEvent.getId())
+                            .setParameter("remindTime", remindTime)
+                            .executeUpdate();
+                }
+
+                if (!tagUsers.isEmpty()) {
+                    String tagUsersSql = "insert into user_involve_event (event_id, user_id) values (:eventId, :userId)";
+
+                    for (Integer tagUserId : tagUsers) {
+                        session.createNativeQuery(tagUsersSql)
+                                .setParameter("eventId", newEvent.getId())
+                                .setParameter("userId", tagUserId)
+                                .executeUpdate();
+                    }
                 }
             }
 
@@ -223,13 +265,37 @@ public class EventDAO {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
 
-            String getEventSql = "select e.id, e.name, e.time_start, e.time_end, e.note, e.user_id, " +
+            String getEventSql = "SELECT e.id, e.name, e.time_start, e.time_end, e.note, e.user_id, " +
                     "COALESCE(re.time, 0) as time, " +
-                    "COALESCE(re.is_success, 0) as is_success " +
-                    "from event e left join remind_event re on e.id = re.id " +
-                    "where e.id = :id";
-            NativeQuery<Event> query = session.createNativeQuery(getEventSql, Event.class).setParameter("id", id);
-            Event event = query.list().get(0);
+                    "COALESCE(re.is_success, 0) as is_success, " +
+                    "CASE " +
+                    "WHEN le.first_event_id IS NOT NULL AND e.id BETWEEN le.first_event_id AND le.last_event_id " +
+                    "THEN TRUE ELSE FALSE " +
+                    "END AS isLoop " +
+                    "FROM event e LEFT JOIN remind_event re ON e.id = re.id " +
+                    "LEFT JOIN loop_event le ON e.id BETWEEN le.first_event_id AND le.last_event_id " +
+                    "WHERE e.id = :eventId";
+
+            List<Object[]> results = session.createNativeQuery(getEventSql)
+                    .setParameter("eventId", id)
+                    .getResultList();
+
+            Event event = new Event();
+
+            if (results.isEmpty()) event = null;
+            else {
+                Object[] row = results.get(0);
+                event.setId((Integer) row[0]);
+                event.setName((String) row[1]);
+                event.setTimeStart(((Timestamp) row[2]).toLocalDateTime());
+                event.setTimeEnd(((Timestamp) row[3]).toLocalDateTime());
+                event.setNote((String) row[4]);
+                event.setUserId((Integer) row[5]);
+                event.setRemindTime(((BigInteger) row[6]).intValue());
+                event.setSuccess(((BigInteger) row[7]).intValue() == 1);
+                event.setLoop(((BigInteger) row[8]).intValue() == 1);
+            }
+
             if (event != null) {
                 String name = body.get("name");
                 String date = body.get("date");
@@ -241,6 +307,18 @@ public class EventDAO {
                 String note = body.get("note");
                 boolean isLoop = Boolean.parseBoolean(body.get("isLoop"));
                 int userId = Integer.parseInt(body.get("userId"));
+                String tagUsersString = body.get("tagUsers");
+
+                List<Integer> tagUsers = new ArrayList<>();
+                if (!tagUsersString.isEmpty() && !tagUsersString.equals("[]")) {
+                    tagUsersString = tagUsersString.replaceAll("\\[|\\]|\\s", "");
+
+                    String[] stringArray = tagUsersString.split(",");
+
+                    for (String s : stringArray) {
+                        tagUsers.add(Integer.parseInt(s));
+                    }
+                }
                 if (userId != event.getUserId()) return false;
 
                 String getRangeSql = "select * from loop_event where :id BETWEEN first_event_id and last_event_id";
@@ -263,8 +341,32 @@ public class EventDAO {
                     event.setNote(note);
 
                     session.saveOrUpdate(event);
+
+                    if (!tagUsers.isEmpty()) {
+                        String deleteTagUsersSql = "delete from user_involve_event where event_id = :eventId";
+                        session.createNativeQuery(deleteTagUsersSql)
+                                .setParameter("eventId", id)
+                                .executeUpdate();
+
+                        String tagUsersSql = "insert into user_involve_event (event_id, user_id) values (:eventId, :userId)";
+
+                        for (Integer tagUserId : tagUsers) {
+                            session.createNativeQuery(tagUsersSql)
+                                    .setParameter("eventId", id)
+                                    .setParameter("userId", tagUserId)
+                                    .executeUpdate();
+                        }
+                    }
                 }
                 else {
+                    if (!tagUsers.isEmpty()) {
+                        String deleteTagUsersSql = "delete from user_involve_event where event_id between :firstId and :lastId";
+                        session.createNativeQuery(deleteTagUsersSql)
+                                .setParameter("firstId", firstId)
+                                .setParameter("lastId", lastId)
+                                .executeUpdate();
+                    }
+
                     int insertId = firstId;
                     while (insertId <= lastId) {
                         String hql = "update Event set name = :name, note = :note where id = :id";
@@ -273,6 +375,15 @@ public class EventDAO {
                                 .setParameter("name", name)
                                 .setParameter("note", note)
                                 .executeUpdate();
+
+                        String tagUsersSql = "insert into user_involve_event (event_id, user_id) values (:eventId, :userId)";
+
+                        for (Integer tagUserId : tagUsers) {
+                            session.createNativeQuery(tagUsersSql)
+                                    .setParameter("eventId", insertId)
+                                    .setParameter("userId", tagUserId)
+                                    .executeUpdate();
+                        }
 
                         insertId++;
                     }
