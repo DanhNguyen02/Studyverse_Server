@@ -5,9 +5,12 @@
     <session-factory>
         <property name="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</property>
         <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
-        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/server</property>
-        <property name="hibernate.connection.username">root</property>
-        <property name="hibernate.connection.password">123456</property>
+<!--        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/server</property>-->
+<!--        <property name="hibernate.connection.username">root</property>-->
+<!--        <property name="hibernate.connection.password">123456</property>-->
+        <property name="hibernate.connection.url">jdbc:mysql://sql6.freemysqlhosting.net:3306/sql6694043</property>
+        <property name="hibernate.connection.username">sql6694043</property>
+        <property name="hibernate.connection.password">n7Xmp42dRC</property>
         <property name="show_sql">true</property>
 
         <mapping class="com.studyverse.server.Model.Event"/>
