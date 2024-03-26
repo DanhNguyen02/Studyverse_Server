@@ -147,4 +147,28 @@ public class FamilyController {
 
         return response;
     }
+
+    @PostMapping("/updateName")
+    public Map<String, String> updateFamilyName(@RequestBody HashMap<String, String> body) {
+        Map<String, String> response = new HashMap<>();
+
+        String id = body.get("id");
+        String name = body.get("name");
+
+        response.put("msg", familyDAO.updateFamilyName(id, name) ? "1" : "0");
+
+        return response;
+    }
+
+    @PostMapping("/updateAvatar")
+    public Map<String, String> updateFamilyAvatar(@RequestBody HashMap<String, String> body) {
+        Map<String, String> response = new HashMap<>();
+
+        String id = body.get("id");
+        String avatar = body.get("avatar");
+
+        response.put("msg", familyDAO.updateFamilyAvatar(id, avatar) ? "1" : "0");
+
+        return response;
+    }
 }
