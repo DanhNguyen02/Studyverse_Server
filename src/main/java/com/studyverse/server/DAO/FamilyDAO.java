@@ -112,9 +112,10 @@ public class FamilyDAO {
         boolean checkUser = checkUserExistsAndNotInFamily(email);
         if (!checkUser) return 0;
 
-        String sql = "insert into family (id, email) values (?, ?)";
+        String sql = "insert into family (id, name, email) values (?, ?, ?)";
+        String name = "Gia đình";
         int id = countFamily() + 1;
-        int rowsAffected = jdbcTemplate.update(sql, id, email);
+        int rowsAffected = jdbcTemplate.update(sql, id, name, email);
 
         if (rowsAffected > 0) {
             handleJoinFamily(id, email);
@@ -265,5 +266,17 @@ public class FamilyDAO {
             jdbcTemplate.update(updateUserSql, user.getId());
         }
         return true;
+    }
+
+    public boolean updateFamilyName(String id, String name) {
+        String sql = "update family set name = ? where id = ?";
+        int rowsAffected = jdbcTemplate.update(sql, name, id);
+        return rowsAffected != 0;
+    }
+
+    public boolean updateFamilyAvatar(String id, String avatar) {
+        String sql = "update family set avatar = ? where id = ?";
+        int rowsAffected = jdbcTemplate.update(sql, avatar, id);
+        return rowsAffected != 0;
     }
 }
