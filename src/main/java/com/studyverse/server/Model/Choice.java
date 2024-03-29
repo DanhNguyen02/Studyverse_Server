@@ -1,10 +1,11 @@
 package com.studyverse.server.Model;
 
 import javax.persistence.*;
+import java.util.Arrays;
 
 @Entity
-@Table(name = "answer")
-public class Answer {
+@Table(name = "choice")
+public class Choice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -13,7 +14,10 @@ public class Answer {
     private String content;
 
     @Column(name = "image")
-    private String image;
+    private byte[] image;
+
+    @Column(name = "question_id")
+    private int questionId;
 
     public int getId() {
         return id;
@@ -31,12 +35,20 @@ public class Answer {
         this.content = content;
     }
 
-    public String getImage() {
+    public byte[] getImage() {
         return image;
     }
 
-    public void setImage(String image) {
+    public void setImage(byte[] image) {
         this.image = image;
+    }
+
+    public int getQuestionId() {
+        return questionId;
+    }
+
+    public void setQuestionId(int questionId) {
+        this.questionId = questionId;
     }
 
     @Override
@@ -44,7 +56,7 @@ public class Answer {
         return "Answer{" +
                 "id=" + id +
                 ", content='" + content + '\'' +
-                ", image='" + image + '\'' +
+                ", image='" + Arrays.toString(image) + '\'' +
                 '}';
     }
 }
