@@ -278,6 +278,12 @@ public class TestDAO {
                                 .filter(choice -> questionId == choice.getQuestionId())
                                 .collect(Collectors.toList()));
 
+                        List<Choice> correctChoices = question.getChoices().stream()
+                                .filter(choice -> question.getAnswerId() == choice.getId())
+                                .toList();
+
+                        question.setCorrectChoice(correctChoices.get(0));
+
                         String getTagsSql = "select tag_id from question_have_tag where question_id = :questionId";
 
                         List<Integer> tagList = session.createNativeQuery(getTagsSql)
