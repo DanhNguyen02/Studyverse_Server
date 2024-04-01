@@ -1,5 +1,7 @@
 package com.studyverse.server.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +32,7 @@ public class Question {
     private int type;
 
     @Column(name = "test_id")
+    @JsonIgnore
     private int testId;
 
     @Transient

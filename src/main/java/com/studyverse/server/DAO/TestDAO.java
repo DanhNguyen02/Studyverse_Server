@@ -12,6 +12,7 @@ import org.hibernate.cfg.Configuration;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class TestDAO {
@@ -217,5 +218,101 @@ public class TestDAO {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public Map<Integer, List<Test>> getAllTests(Integer familyId) {
+        Map<Integer, List<Test>> listMap = new HashMap<>();
+
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+
+            String getChildrenIdSql = "select * from user where family_id = :familyId and role = 0";
+
+            List<Object[]> results = session.createNativeQuery(getChildrenIdSql)
+                    .setParameter("familyId", familyId)
+                    .getResultList();
+
+            for (Object[] row : results) {
+                int id = (Integer) row[0];
+
+                String getTestIdListSql = "select test_id from children_do_test where children_id = :id";
+
+                List<Object[]> testIds = session.createNativeQuery(getTestIdListSql)
+                        .setParameter("id", id)
+                        .getResultList();
+
+                List<Integer> childrenIdList = new ArrayList<>();
+
+                for (Object[] childrenDoTestRow : results) {
+                    childrenIdList.add((Integer) childrenDoTestRow[0]);
+                }
+
+                List<Test> tests = new ArrayList<>();
+
+                if (!childrenIdList.isEmpty()) {
+                    String getTestsSql = "SELECT * FROM test t " +
+                            "WHERE t.id IN (:testIds)";
+
+                    String getQuestionsSql = "SELECT * FROM question q " +
+                            "WHERE q.test_id IN (:testIds)";
+
+                    String getChoicesSql = "SELECT * FROM choice c " +
+                            "WHERE c.question_id IN (SELECT q.id FROM question q WHERE q.test_id IN (:testIds))";
+
+                    tests = session.createNativeQuery(getTestsSql, Test.class)
+                            .setParameter("testIds", testIds)
+                            .getResultList();
+
+                    List<Question> questions = session.createNativeQuery(getQuestionsSql, Question.class)
+                            .setParameter("testIds", testIds)
+                            .getResultList();
+
+                    List<Choice> choices = session.createNativeQuery(getChoicesSql, Choice.class)
+                            .setParameter("testIds", testIds)
+                            .getResultList();
+
+                    for (Question question : questions) {
+                        int questionId = question.getId();
+
+                        question.setChoices(choices.stream()
+                                .filter(choice -> questionId == choice.getQuestionId())
+                                .collect(Collectors.toList()));
+
+                        String getTagsSql = "select tag_id from question_have_tag where question_id = :questionId";
+
+                        List<Integer> tagList = session.createNativeQuery(getTagsSql)
+                                .setParameter("questionId", question)
+                                .getResultList();
+
+                        question.setTags(tagList);
+                    }
+
+                    for (Test test : tests) {
+                        int testId = test.getId();
+
+                        test.setQuestions(questions.stream().
+                                filter(question -> testId == question.getTestId()).
+                                collect(Collectors.toList()));
+
+                        String getTagsSql = "select tag_id from test_have_tag where test_id = :testId";
+
+                        List<Integer> tagList = session.createNativeQuery(getTagsSql)
+                                .setParameter("testId", testId)
+                                .getResultList();
+
+                        test.setTags(tagList);
+                    }
+                }
+
+                listMap.put(id, tests);
+            }
+
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new HashMap<>();
+        }
+
+        return listMap;
     }
 }
