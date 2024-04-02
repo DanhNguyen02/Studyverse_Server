@@ -8,12 +8,16 @@
 <!--        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/server</property>-->
 <!--        <property name="hibernate.connection.username">root</property>-->
 <!--        <property name="hibernate.connection.password">123456</property>-->
-        <property name="hibernate.connection.url">jdbc:mysql://sql6.freemysqlhosting.net:3306/sql6694043</property>
-        <property name="hibernate.connection.username">sql6694043</property>
-        <property name="hibernate.connection.password">n7Xmp42dRC</property>
+        <property name="hibernate.connection.url">jdbc:mysql://mysql-282d5c59-studyverse2024.a.aivencloud.com:16030/studyversedb</property>
+        <property name="hibernate.connection.username">avnadmin</property>
+        <property name="hibernate.connection.password">AVNS_PbKj_puZO_iOhB1O4HG</property>
         <property name="show_sql">true</property>
 
         <mapping class="com.studyverse.server.Model.Event"/>
         <mapping class="com.studyverse.server.Model.Message"/>
+        <mapping class="com.studyverse.server.Model.Choice"/>
+        <mapping class="com.studyverse.server.Model.Question"/>
+        <mapping class="com.studyverse.server.Model.Test"/>
+        <mapping class="com.studyverse.server.Model.Submission"/>
     </session-factory>
 </hibernate-configuration>
