@@ -1,5 +1,7 @@
 package com.studyverse.server.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.Arrays;
 import java.util.List;
@@ -24,13 +26,18 @@ public class Question {
     private byte[] image;
 
     @Column(name = "answer_id")
+    @JsonIgnore
     private int answerId;
 
     @Column(name = "type")
     private int type;
 
     @Column(name = "test_id")
+    @JsonIgnore
     private int testId;
+
+    @Transient
+    private Choice correctChoice;
 
     @Transient
     private List<Choice> choices;
@@ -116,6 +123,14 @@ public class Question {
 
     public void setTags(List<Integer> tags) {
         this.tags = tags;
+    }
+
+    public Choice getCorrectChoice() {
+        return correctChoice;
+    }
+
+    public void setCorrectChoice(Choice correctChoice) {
+        this.correctChoice = correctChoice;
     }
 
     @Override

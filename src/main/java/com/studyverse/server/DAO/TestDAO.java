@@ -4,14 +4,23 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studyverse.server.Model.Choice;
 import com.studyverse.server.Model.Question;
+import com.studyverse.server.Model.Submission;
 import com.studyverse.server.Model.Test;
 import com.studyverse.server.SafeConvert;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.query.Query;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class TestDAO {
@@ -27,6 +36,11 @@ public class TestDAO {
             int questionCount = SafeConvert.safeConvertToInt(body.get("questionCount"));
             int questionCountToPass = SafeConvert.safeConvertToInt(body.get("questionCountToPass"));
             int parentId = SafeConvert.safeConvertToInt(body.get("parentId"));
+            String startDateString = (String) body.get("startDate");
+            String endDateString = (String) body.get("endDate");
+
+            LocalDateTime startDate = LocalDateTime.parse(startDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            LocalDateTime endDate = LocalDateTime.parse(endDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
             // Convert childrenIdList string to list
             List<Integer> childrenIds = new ArrayList<>();
@@ -63,6 +77,8 @@ public class TestDAO {
             test.setTime(time);
             test.setQuestionCount(questionCount);
             test.setQuestionCountToPass(questionCountToPass);
+            test.setStartDate(startDate);
+            test.setEndDate(endDate);
             test.setParentId(parentId);
 
             session.save(test);
@@ -217,5 +233,205 @@ public class TestDAO {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public Map<Integer, List<Test>> getAllTests(Integer familyId) {
+        Map<Integer, List<Test>> listMap = new HashMap<>();
+
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+
+            String getChildrenIdSql = "select * from user where family_id = :familyId and role = 0";
+
+            List<Object[]> results = session.createNativeQuery(getChildrenIdSql)
+                    .setParameter("familyId", familyId)
+                    .getResultList();
+
+            for (Object[] row : results) {
+                int id = (Integer) row[0];
+
+                String getTestIdListSql = "select test_id from children_do_test where children_id = :id";
+
+                List<Object[]> testIds = session.createNativeQuery(getTestIdListSql)
+                        .setParameter("id", id)
+                        .getResultList();
+
+                List<Integer> childrenIdList = new ArrayList<>();
+
+                for (Object[] childrenDoTestRow : results) {
+                    childrenIdList.add((Integer) childrenDoTestRow[0]);
+                }
+
+                List<Test> tests = new ArrayList<>();
+
+                if (!childrenIdList.isEmpty()) {
+                    String getTestsSql = "SELECT * FROM test t " +
+                            "WHERE t.id IN (:testIds)";
+
+                    String getQuestionsSql = "SELECT * FROM question q " +
+                            "WHERE q.test_id IN (:testIds)";
+
+                    String getChoicesSql = "SELECT * FROM choice c " +
+                            "WHERE c.question_id IN (SELECT q.id FROM question q WHERE q.test_id IN (:testIds))";
+
+                    tests = session.createNativeQuery(getTestsSql, Test.class)
+                            .setParameter("testIds", testIds)
+                            .getResultList();
+
+                    List<Question> questions = session.createNativeQuery(getQuestionsSql, Question.class)
+                            .setParameter("testIds", testIds)
+                            .getResultList();
+
+                    List<Choice> choices = session.createNativeQuery(getChoicesSql, Choice.class)
+                            .setParameter("testIds", testIds)
+                            .getResultList();
+
+                    for (Question question : questions) {
+                        int questionId = question.getId();
+
+                        question.setChoices(choices.stream()
+                                .filter(choice -> questionId == choice.getQuestionId())
+                                .collect(Collectors.toList()));
+
+                        List<Choice> correctChoices = question.getChoices().stream()
+                                .filter(choice -> question.getAnswerId() == choice.getId())
+                                .toList();
+
+                        question.setCorrectChoice(correctChoices.get(0));
+
+                        String getTagsSql = "select tag_id from question_have_tag where question_id = :questionId";
+
+                        List<Integer> tagList = session.createNativeQuery(getTagsSql)
+                                .setParameter("questionId", question)
+                                .getResultList();
+
+                        question.setTags(tagList);
+                    }
+
+                    for (Test test : tests) {
+                        int testId = test.getId();
+
+                        test.setQuestions(questions.stream().
+                                filter(question -> testId == question.getTestId()).
+                                collect(Collectors.toList()));
+
+                        String getTagsSql = "select tag_id from test_have_tag where test_id = :testId";
+
+                        List<Integer> tagList = session.createNativeQuery(getTagsSql)
+                                .setParameter("testId", testId)
+                                .getResultList();
+
+                        test.setTags(tagList);
+
+                        // Get submissions
+                        Query query = session.createQuery("FROM Submission WHERE testId = :testId")
+                                .setParameter("testId", testId);
+                        List<Submission> submissions = query.list();
+
+                        for (Submission submission : submissions) {
+                            String choiceSubmissionSql = "select c.* from choice_in_submission cis " +
+                                    "inner join choice c on cis.choice_id = c.id where cis.submission_id = :submissionId";
+
+                            List choiceSubmissionResults = session.createNativeQuery(choiceSubmissionSql)
+                                    .setParameter("submissionId", submission.getId())
+                                    .setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP)
+                                    .list();
+
+                            Map<Integer, Choice> answers = new HashMap<>();
+
+                            for (Object choiceSubmission : choiceSubmissionResults) {
+                                Map choiceSubmissionRow = (Map) choiceSubmission;
+
+                                Choice choice = new Choice();
+                                choice.setId(SafeConvert.safeConvertToInt(choiceSubmissionRow.get("id")));
+                                choice.setContent((String) choiceSubmissionRow.get("content"));
+                                int questionId = SafeConvert.safeConvertToInt(choiceSubmissionRow.get("question_id"));
+
+                                answers.put(questionId, choice);
+                            }
+
+                            submission.setAnswers(answers);
+                        }
+
+                        test.setSubmissions(submissions);
+                    }
+                }
+
+                listMap.put(id, tests);
+            }
+
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new HashMap<>();
+        }
+
+        return listMap;
+    }
+
+    public boolean submitTest(Map<String, Object> body) {
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+
+            String startDateString = (String) body.get("startDate");
+            LocalDateTime startDate = LocalDateTime.parse(startDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+            String endDateString = (String) body.get("endDate");
+            LocalDateTime endDate = LocalDateTime.parse(endDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+            int testId = SafeConvert.safeConvertToInt(body.get("testId"));
+            int childrenId = SafeConvert.safeConvertToInt(body.get("childrenId"));
+
+            Submission submission = new Submission();
+
+            submission.setStartDate(startDate);
+            submission.setEndDate(endDate);
+            submission.setTestId(testId);
+            submission.setChildrenId(childrenId);
+
+            session.save(submission);
+
+            if (body.get("questions") instanceof String questionsString) {
+                JSONArray questions = new JSONArray(questionsString);
+
+                for (int i = 0; i < questions.length(); i++) {
+                    JSONObject question = questions.getJSONObject(i);
+
+                    int questionId = SafeConvert.safeConvertToInt(question.getString("id"));
+                    int choiceId = SafeConvert.safeConvertToInt(question.getString("choiceId"));
+
+                    String sql = "insert into choice_in_submission (submission_id, choice_id, question_id) values (:submissionId, :choiceId, :questionId)";
+
+                    session.createNativeQuery(sql)
+                            .setParameter("submissionId", submission.getId())
+                            .setParameter("choiceId", choiceId)
+                            .setParameter("questionId", questionId)
+                            .executeUpdate();
+                }
+            }
+            else if (body.get("questions") instanceof List) {
+                List<Map<String, Object>> questionsList = (List<Map<String, Object>>) body.get("questions");
+
+                for (Map<String, Object> questionMap : questionsList) {
+                    int questionId = SafeConvert.safeConvertToInt(questionMap.get("id").toString());
+                    int choiceId = SafeConvert.safeConvertToInt(questionMap.get("choiceId").toString());
+
+                    String sql = "insert into choice_in_submission (submission_id, choice_id, question_id) values (:submissionId, :choiceId, :questionId)";
+
+                    session.createNativeQuery(sql)
+                            .setParameter("submissionId", submission.getId())
+                            .setParameter("choiceId", choiceId)
+                            .setParameter("questionId", questionId)
+                            .executeUpdate();
+                }
+            }
+
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
     }
 }

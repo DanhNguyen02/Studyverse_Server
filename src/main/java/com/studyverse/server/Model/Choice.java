@@ -1,5 +1,7 @@
 package com.studyverse.server.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.Arrays;
 
@@ -17,6 +19,7 @@ public class Choice {
     private byte[] image;
 
     @Column(name = "question_id")
+    @JsonIgnore
     private int questionId;
 
     public int getId() {
