@@ -11,6 +11,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,6 +30,11 @@ public class TestDAO {
             int questionCount = SafeConvert.safeConvertToInt(body.get("questionCount"));
             int questionCountToPass = SafeConvert.safeConvertToInt(body.get("questionCountToPass"));
             int parentId = SafeConvert.safeConvertToInt(body.get("parentId"));
+            String startDateString = (String) body.get("startDate");
+            String endDateString = (String) body.get("endDate");
+
+            LocalDateTime startDate = LocalDateTime.parse(startDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            LocalDateTime endDate = LocalDateTime.parse(endDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
             // Convert childrenIdList string to list
             List<Integer> childrenIds = new ArrayList<>();
@@ -64,6 +71,8 @@ public class TestDAO {
             test.setTime(time);
             test.setQuestionCount(questionCount);
             test.setQuestionCountToPass(questionCountToPass);
+            test.setStartDate(startDate);
+            test.setEndDate(endDate);
             test.setParentId(parentId);
 
             session.save(test);

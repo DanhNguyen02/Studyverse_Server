@@ -1,6 +1,7 @@
 package com.studyverse.server.Model;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -24,6 +25,12 @@ public class Test {
 
     @Column(name = "question_count_to_pass")
     private int questionCountToPass;
+
+    @Column(name = "start_date")
+    private LocalDateTime startDate;
+
+    @Column(name = "end_date")
+    private LocalDateTime endDate;
 
     @Column(name = "parent_id")
     private int parentId;
@@ -82,6 +89,22 @@ public class Test {
         this.questionCountToPass = questionCountToPass;
     }
 
+    public LocalDateTime getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDateTime startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDateTime getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDateTime endDate) {
+        this.endDate = endDate;
+    }
+
     public int getParentId() {
         return parentId;
     }
@@ -94,16 +117,16 @@ public class Test {
         return questions;
     }
 
-    public void setQuestions(List<Question> questions) {
-        this.questions = questions;
-    }
-
     public List<Integer> getTags() {
         return tags;
     }
 
     public void setTags(List<Integer> tags) {
         this.tags = tags;
+    }
+
+    public void setQuestions(List<Question> questions) {
+        this.questions = questions;
     }
 
     @Override
