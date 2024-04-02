@@ -41,6 +41,9 @@ public class Test {
     @Transient
     private List<Integer> tags;
 
+    @Transient
+    private List<Submission> submissions;
+
     public int getId() {
         return id;
     }
@@ -127,6 +130,14 @@ public class Test {
 
     public void setQuestions(List<Question> questions) {
         this.questions = questions;
+    }
+
+    public List<Submission> getSubmissions() {
+        return submissions;
+    }
+
+    public void setSubmissions(List<Submission> submissions) {
+        this.submissions = submissions;
     }
 
     @Override

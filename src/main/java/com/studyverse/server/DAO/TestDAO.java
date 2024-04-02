@@ -4,14 +4,20 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studyverse.server.Model.Choice;
 import com.studyverse.server.Model.Question;
+import com.studyverse.server.Model.Submission;
 import com.studyverse.server.Model.Test;
 import com.studyverse.server.SafeConvert;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.query.Query;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -316,6 +322,38 @@ public class TestDAO {
                                 .getResultList();
 
                         test.setTags(tagList);
+
+                        // Get submissions
+                        Query query = session.createQuery("FROM Submission WHERE testId = :testId")
+                                .setParameter("testId", testId);
+                        List<Submission> submissions = query.list();
+
+                        for (Submission submission : submissions) {
+                            String choiceSubmissionSql = "select c.* from choice_in_submission cis " +
+                                    "inner join choice c on cis.choice_id = c.id where cis.submission_id = :submissionId";
+
+                            List choiceSubmissionResults = session.createNativeQuery(choiceSubmissionSql)
+                                    .setParameter("submissionId", submission.getId())
+                                    .setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP)
+                                    .list();
+
+                            Map<Integer, Choice> answers = new HashMap<>();
+
+                            for (Object choiceSubmission : choiceSubmissionResults) {
+                                Map choiceSubmissionRow = (Map) choiceSubmission;
+
+                                Choice choice = new Choice();
+                                choice.setId(SafeConvert.safeConvertToInt(choiceSubmissionRow.get("id")));
+                                choice.setContent((String) choiceSubmissionRow.get("content"));
+                                int questionId = SafeConvert.safeConvertToInt(choiceSubmissionRow.get("question_id"));
+
+                                answers.put(questionId, choice);
+                            }
+
+                            submission.setAnswers(answers);
+                        }
+
+                        test.setSubmissions(submissions);
                     }
                 }
 
@@ -329,5 +367,71 @@ public class TestDAO {
         }
 
         return listMap;
+    }
+
+    public boolean submitTest(Map<String, Object> body) {
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+
+            String startDateString = (String) body.get("startDate");
+            LocalDateTime startDate = LocalDateTime.parse(startDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+            String endDateString = (String) body.get("endDate");
+            LocalDateTime endDate = LocalDateTime.parse(endDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+            int testId = SafeConvert.safeConvertToInt(body.get("testId"));
+            int childrenId = SafeConvert.safeConvertToInt(body.get("childrenId"));
+
+            Submission submission = new Submission();
+
+            submission.setStartDate(startDate);
+            submission.setEndDate(endDate);
+            submission.setTestId(testId);
+            submission.setChildrenId(childrenId);
+
+            session.save(submission);
+
+            if (body.get("questions") instanceof String questionsString) {
+                JSONArray questions = new JSONArray(questionsString);
+
+                for (int i = 0; i < questions.length(); i++) {
+                    JSONObject question = questions.getJSONObject(i);
+
+                    int questionId = SafeConvert.safeConvertToInt(question.getString("id"));
+                    int choiceId = SafeConvert.safeConvertToInt(question.getString("choiceId"));
+
+                    String sql = "insert into choice_in_submission (submission_id, choice_id, question_id) values (:submissionId, :choiceId, :questionId)";
+
+                    session.createNativeQuery(sql)
+                            .setParameter("submissionId", submission.getId())
+                            .setParameter("choiceId", choiceId)
+                            .setParameter("questionId", questionId)
+                            .executeUpdate();
+                }
+            }
+            else if (body.get("questions") instanceof List) {
+                List<Map<String, Object>> questionsList = (List<Map<String, Object>>) body.get("questions");
+
+                for (Map<String, Object> questionMap : questionsList) {
+                    int questionId = SafeConvert.safeConvertToInt(questionMap.get("id").toString());
+                    int choiceId = SafeConvert.safeConvertToInt(questionMap.get("choiceId").toString());
+
+                    String sql = "insert into choice_in_submission (submission_id, choice_id, question_id) values (:submissionId, :choiceId, :questionId)";
+
+                    session.createNativeQuery(sql)
+                            .setParameter("submissionId", submission.getId())
+                            .setParameter("choiceId", choiceId)
+                            .setParameter("questionId", questionId)
+                            .executeUpdate();
+                }
+            }
+
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
     }
 }

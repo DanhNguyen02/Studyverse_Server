@@ -28,4 +28,13 @@ public class TestController {
 
         return response;
     }
+
+    @PostMapping("/submit")
+    public Map<String, String> submitTest(@RequestBody HashMap<String, Object> body) {
+        Map<String, String> response = new HashMap<>();
+
+        response.put("msg", testDAO.submitTest(body) ? "1" : "0");
+
+        return response;
+    }
 }
