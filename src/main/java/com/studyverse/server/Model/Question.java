@@ -13,8 +13,8 @@ public class Question {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "content")
-    private String content;
+    @Column(name = "name")
+    private String name;
 
     @Column(name = "description")
     private String description;
@@ -53,12 +53,12 @@ public class Question {
         this.id = id;
     }
 
-    public String getContent() {
-        return content;
+    public String getName() {
+        return name;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDescription() {
@@ -137,7 +137,7 @@ public class Question {
     public String toString() {
         return "Question{" +
                 "id=" + id +
-                ", content='" + content + '\'' +
+                ", content='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", suggest='" + suggest + '\'' +
                 ", image='" + Arrays.toString(image) + '\'' +
