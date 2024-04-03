@@ -10,6 +10,7 @@ import com.studyverse.server.SafeConvert;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
 import org.json.JSONArray;
@@ -17,7 +18,6 @@ import org.json.JSONObject;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,8 +27,9 @@ public class TestDAO {
     private final SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
 
     public boolean createTest(Map<String, Object> body) {
+        Transaction transaction = null;
         try (Session session = sessionFactory.openSession()) {
-            session.beginTransaction();
+            transaction = session.beginTransaction();
 
             String name = (String) body.get("name");
             String description = (String) body.get("description");
@@ -115,8 +116,11 @@ public class TestDAO {
                 }
             }
 
-            session.getTransaction().commit();
+            transaction.commit();
         } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             e.printStackTrace();
             return false;
         }
@@ -155,6 +159,9 @@ public class TestDAO {
 
             return questions;
         } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
             e.printStackTrace();
             return Collections.emptyList();
         }
@@ -163,7 +170,7 @@ public class TestDAO {
     public Question convertMapToQuestion(Map<String, Object> questionMap, Session session, int testId) {
         try {
             Question question = new Question();
-            question.setContent((String) questionMap.get("content"));
+            question.setName((String) questionMap.get("name"));
             question.setDescription((String) questionMap.get("description"));
             question.setSuggest((String) questionMap.get("suggest"));
             String questionImageDataBase64 = (String) questionMap.get("image");
@@ -230,6 +237,9 @@ public class TestDAO {
 
             return question;
         } catch (Exception e) {
+            if (session.getTransaction() != null) {
+                session.getTransaction().rollback();
+            }
             e.printStackTrace();
             return null;
         }
@@ -237,9 +247,9 @@ public class TestDAO {
 
     public Map<Integer, List<Test>> getAllTests(Integer familyId) {
         Map<Integer, List<Test>> listMap = new HashMap<>();
-
+        Transaction transaction = null;
         try (Session session = sessionFactory.openSession()) {
-            session.beginTransaction();
+            transaction = session.beginTransaction();
 
             String getChildrenIdSql = "select * from user where family_id = :familyId and role = 0";
 
@@ -360,8 +370,11 @@ public class TestDAO {
                 listMap.put(id, tests);
             }
 
-            session.getTransaction().commit();
+            transaction.commit();
         } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             e.printStackTrace();
             return new HashMap<>();
         }
@@ -370,8 +383,9 @@ public class TestDAO {
     }
 
     public boolean submitTest(Map<String, Object> body) {
+        Transaction transaction = null;
         try (Session session = sessionFactory.openSession()) {
-            session.beginTransaction();
+            transaction = session.beginTransaction();
 
             String startDateString = (String) body.get("startDate");
             LocalDateTime startDate = LocalDateTime.parse(startDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
@@ -397,8 +411,8 @@ public class TestDAO {
                 for (int i = 0; i < questions.length(); i++) {
                     JSONObject question = questions.getJSONObject(i);
 
-                    int questionId = SafeConvert.safeConvertToInt(question.getString("id"));
-                    int choiceId = SafeConvert.safeConvertToInt(question.getString("choiceId"));
+                    int questionId = SafeConvert.safeConvertToInt(question.get("id"));
+                    int choiceId = SafeConvert.safeConvertToInt(question.get("choiceId"));
 
                     String sql = "insert into choice_in_submission (submission_id, choice_id, question_id) values (:submissionId, :choiceId, :questionId)";
 
@@ -426,12 +440,177 @@ public class TestDAO {
                 }
             }
 
-            session.getTransaction().commit();
+            transaction.commit();
         } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             e.printStackTrace();
             return false;
         }
 
         return true;
+    }
+
+//    public boolean updateTest(Integer id, Map<String, Object> body) {
+//        Transaction transaction = null;
+//        try (Session session = sessionFactory.openSession()) {
+//            transaction = session.beginTransaction();
+//
+//            String name = (String) body.get("name");
+//            String description = (String) body.get("description");
+//            int time = SafeConvert.safeConvertToInt(body.get("time"));
+//            int questionCount = SafeConvert.safeConvertToInt(body.get("questionCount"));
+//            int questionCountToPass = SafeConvert.safeConvertToInt(body.get("questionCountToPass"));
+//            int parentId = SafeConvert.safeConvertToInt(body.get("parentId"));
+//            String startDateString = (String) body.get("startDate");
+//            String endDateString = (String) body.get("endDate");
+//
+//            LocalDateTime startDate = LocalDateTime.parse(startDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+//            LocalDateTime endDate = LocalDateTime.parse(endDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+//
+//            // Convert childrenIdList string to list
+//            List<Integer> childrenIds = new ArrayList<>();
+//            if (body.get("childrenIds") instanceof String childrenIdsString) {
+//                childrenIdsString = childrenIdsString.replaceAll("\\[|\\]|\\s", "");
+//                String[] ids = childrenIdsString.split(",");
+//                for (String childrenId : ids) {
+//                    childrenIds.add(Integer.parseInt(childrenId.trim()));
+//                }
+//            } else if (body.get("childrenIds") instanceof List<?>) {
+//                for (Object childrenId : (List<?>) body.get("childrenIds")) {
+//                    childrenIds.add((Integer) childrenId);
+//                }
+//            }
+//
+//            // Update records into children_do_test table
+//            session.createNativeQuery("delete from children_do_test where test_id = :testId")
+//                    .setParameter("testId", id)
+//                    .executeUpdate();
+//
+//            for (Integer childrenId : childrenIds) {
+//                String sql = "insert into children_do_test (children_id, test_id) values (:childrenId, :testId)";
+//
+//                session.createNativeQuery(sql)
+//                        .setParameter("childrenId", childrenId)
+//                        .setParameter("testId", id)
+//                        .executeUpdate();
+//            }
+//
+//            // Convert tagList string to list
+//            List<Integer> tags = new ArrayList<>();
+//            if (body.get("tags") instanceof String tagsString) {
+//                tagsString = tagsString.replaceAll("\\[|\\]|\\s", "");
+//                String[] tagList = tagsString.split(",");
+//                for (String tagId : tagList) {
+//                    tags.add(Integer.parseInt(tagId.trim()));
+//                }
+//            } else if (body.get("tags") instanceof List<?>) {
+//                for (Object tagId : (List<?>) body.get("tags")) {
+//                    tags.add((Integer) tagId);
+//                }
+//            }
+//
+//            // Update records in test_have_tag table
+//            session.createNativeQuery("delete from test_have_tag where test_id = :testId")
+//                    .setParameter("testId", id)
+//                    .executeUpdate();
+//
+//            for (Integer tag : tags) {
+//                String sql = "insert into test_have_tag (tag_id, test_id) values (:tag, :testId)";
+//
+//                session.createNativeQuery(sql)
+//                        .setParameter("tag", tag)
+//                        .setParameter("testId", id)
+//                        .executeUpdate();
+//            }
+//
+//            // Update questions
+//            if (body.get("questions") instanceof String questionsString) {
+//                updateQuestionsString(questionsString, session, id);
+//            } else if (body.get("questions") instanceof List<?>) {
+//                for (Object questionObj : (List<?>) body.get("questions")) {
+//                    Map<String, Object> questionMap = (Map<String, Object>) questionObj;
+////                    Question question = convertMapToQuestion(questionMap, session, id);
+////                    questions.add(question);
+//                    updateQuestionMap(questionMap, session, id);
+//                }
+//            }
+//
+//            transaction.commit();
+//
+//            return true;
+//        } catch (Exception e) {
+//            if (transaction != null) {
+//                transaction.rollback();
+//            }
+//            e.printStackTrace();
+//            return false;
+//        }
+//    }
+
+//    public void updateQuestionsString(String questionString, Session session, Integer testId) {
+//        Transaction transaction = session.getTransaction();
+//
+//        try {
+//
+//        } catch (Exception e) {
+//            if (transaction != null) {
+//                transaction.rollback();
+//            }
+//            e.printStackTrace();
+//        }
+//    }
+
+//    public void updateQuestionMap(Map<String, Object> questionMap, Session session, Integer testId) {
+//        Transaction transaction = session.getTransaction();
+//
+//        try {
+//            Integer questionId = SafeConvert.safeConvertToInt(questionMap.get("id"));
+//
+//            Question question = session.createQuery("FROM Question WHERE id = :id", Question.class)
+//                    .setParameter("id", questionId)
+//                    .uniqueResult();
+//
+//            String name = (String) questionMap.get("name");
+//            String description = (String) questionMap.get("description");
+//            String suggest = (String) questionMap.get("suggest");
+//            byte[] image = null;
+//            String questionImageDataBase64 = (String) questionMap.get("image");
+//            if (questionImageDataBase64 != null && !questionImageDataBase64.isEmpty()) {
+//                image = Base64.getDecoder().decode(questionImageDataBase64);
+//            }
+//            else image = new byte[0];
+//            Choice correctChoice = (Choice) questionMap.get("correctChoice");
+//
+//        } catch (Exception e) {
+//            if (transaction != null) {
+//                transaction.rollback();
+//            }
+//            e.printStackTrace();
+//        }
+//    }
+
+    public boolean deleteTest(Integer id) {
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+
+            String hql = "DELETE FROM Test WHERE id = :id";
+
+            int rowsAffected = session.createQuery(hql)
+                    .setParameter("id", id)
+                    .executeUpdate();
+
+            transaction.commit();
+
+            return rowsAffected != 0;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return false;
+        }
     }
 }
