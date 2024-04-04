@@ -2,10 +2,7 @@ package com.studyverse.server.DAO;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.studyverse.server.Model.Choice;
-import com.studyverse.server.Model.Question;
-import com.studyverse.server.Model.Submission;
-import com.studyverse.server.Model.Test;
+import com.studyverse.server.Model.*;
 import com.studyverse.server.SafeConvert;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -303,11 +300,13 @@ public class TestDAO {
                                 .filter(choice -> questionId == choice.getQuestionId())
                                 .collect(Collectors.toList()));
 
-                        List<Choice> correctChoices = question.getChoices().stream()
-                                .filter(choice -> question.getAnswerId() == choice.getId())
-                                .toList();
+                        if (question.getType() == 1) {
+                            List<Choice> correctChoices = question.getChoices().stream()
+                                    .filter(choice -> question.getAnswerId() == choice.getId())
+                                    .toList();
 
-                        question.setCorrectChoice(correctChoices.get(0));
+                            question.setCorrectChoice(correctChoices.get(0));
+                        }
 
                         String getTagsSql = "select tag_id from question_have_tag where question_id = :questionId";
 
@@ -347,7 +346,14 @@ public class TestDAO {
                                     .setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP)
                                     .list();
 
-                            Map<Integer, Choice> answers = new HashMap<>();
+                            String answerSubmissionSql = "select * from answer_in_submission ais where ais.submission_id = :submissionId";
+
+                            List answerSubmissionResults = session.createNativeQuery(answerSubmissionSql)
+                                    .setParameter("submissionId", submission.getId())
+                                    .setResultTransformer(Criteria.ALIAS_TO_ENTITY_MAP)
+                                    .list();
+
+                            Map<Integer, Object> answers = new HashMap<>();
 
                             for (Object choiceSubmission : choiceSubmissionResults) {
                                 Map choiceSubmissionRow = (Map) choiceSubmission;
@@ -358,6 +364,17 @@ public class TestDAO {
                                 int questionId = SafeConvert.safeConvertToInt(choiceSubmissionRow.get("question_id"));
 
                                 answers.put(questionId, choice);
+                            }
+
+                            for (Object answerSubmission : answerSubmissionResults) {
+                                Map answerSubmissionRow = (Map) answerSubmission;
+
+                                EssayAnswer essayAnswer = new EssayAnswer();
+                                essayAnswer.setAnswer((String) answerSubmissionRow.get("answer"));
+                                essayAnswer.setIsPass(SafeConvert.safeConvertToInt(answerSubmissionRow.get("is_pass")));
+                                int questionId = SafeConvert.safeConvertToInt(answerSubmissionRow.get("question_id"));
+
+                                answers.put(questionId, essayAnswer);
                             }
 
                             submission.setAnswers(answers);
@@ -414,15 +431,28 @@ public class TestDAO {
                     JSONObject question = questions.getJSONObject(i);
 
                     int questionId = SafeConvert.safeConvertToInt(question.get("id"));
-                    int choiceId = SafeConvert.safeConvertToInt(question.get("choiceId"));
+                    if (question.has("choiceId")) {
+                        int choiceId = SafeConvert.safeConvertToInt(question.get("choiceId"));
 
-                    String sql = "insert into choice_in_submission (submission_id, choice_id, question_id) values (:submissionId, :choiceId, :questionId)";
+                        String sql = "insert into choice_in_submission (submission_id, question_id, choice_id) values (:submissionId, :questionId, :choiceId)";
 
-                    session.createNativeQuery(sql)
-                            .setParameter("submissionId", submission.getId())
-                            .setParameter("choiceId", choiceId)
-                            .setParameter("questionId", questionId)
-                            .executeUpdate();
+                        session.createNativeQuery(sql)
+                                .setParameter("submissionId", submission.getId())
+                                .setParameter("questionId", questionId)
+                                .setParameter("choiceId", choiceId)
+                                .executeUpdate();
+                    }
+                    else if (question.has("answer")) {
+                        String answer = (String) question.get("answer");
+
+                        String sql = "insert into answer_in_submission (submission_id, question_id, answer) values (:submissionId, :questionId, :answer)";
+
+                        session.createNativeQuery(sql)
+                                .setParameter("submissionId", submission.getId())
+                                .setParameter("questionId", questionId)
+                                .setParameter("answer", answer)
+                                .executeUpdate();
+                    }
                 }
             }
             else if (body.get("questions") instanceof List) {
@@ -430,15 +460,28 @@ public class TestDAO {
 
                 for (Map<String, Object> questionMap : questionsList) {
                     int questionId = SafeConvert.safeConvertToInt(questionMap.get("id").toString());
-                    int choiceId = SafeConvert.safeConvertToInt(questionMap.get("choiceId").toString());
+                    if (questionMap.containsKey("choiceId")) {
+                        int choiceId = SafeConvert.safeConvertToInt(questionMap.get("choiceId").toString());
 
-                    String sql = "insert into choice_in_submission (submission_id, choice_id, question_id) values (:submissionId, :choiceId, :questionId)";
+                        String sql = "insert into choice_in_submission (submission_id, question_id, choice_id) values (:submissionId, :questionId, :choiceId)";
 
-                    session.createNativeQuery(sql)
-                            .setParameter("submissionId", submission.getId())
-                            .setParameter("choiceId", choiceId)
-                            .setParameter("questionId", questionId)
-                            .executeUpdate();
+                        session.createNativeQuery(sql)
+                                .setParameter("submissionId", submission.getId())
+                                .setParameter("questionId", questionId)
+                                .setParameter("choiceId", choiceId)
+                                .executeUpdate();
+                    }
+                    else if (questionMap.containsKey("answer")) {
+                        String answer = (String) questionMap.get("answer");
+
+                        String sql = "insert into answer_in_submission (submission_id, question_id, answer) values (:submissionId, :questionId, :answer)";
+
+                        session.createNativeQuery(sql)
+                                .setParameter("submissionId", submission.getId())
+                                .setParameter("questionId", questionId)
+                                .setParameter("answer", answer)
+                                .executeUpdate();
+                    }
                 }
             }
 
