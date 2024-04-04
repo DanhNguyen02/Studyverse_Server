@@ -38,14 +38,14 @@ public class TestController {
         return response;
     }
 
-//    @PutMapping("/{id}")
-//    public Map<String, String> updateTest(@PathVariable("id") Integer id, @RequestBody HashMap<String, Object> body) {
-//        Map<String, String> response = new HashMap<>();
-//
-//        response.put("msg", testDAO.updateTest(id, body) ? "1" : "0");
-//
-//        return response;
-//    }
+    @PutMapping("/{id}")
+    public Map<String, String> updateTest(@PathVariable("id") Integer id, @RequestBody HashMap<String, Object> body) {
+        Map<String, String> response = new HashMap<>();
+
+        response.put("msg", testDAO.updateTest(id, body) ? "1" : "0");
+
+        return response;
+    }
 
     @DeleteMapping("/{id}")
     public Map<String, String> deleteTest(@PathVariable("id") Integer id) {

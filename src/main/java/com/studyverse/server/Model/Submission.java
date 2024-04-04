@@ -19,6 +19,9 @@ public class Submission {
     @Column(name = "end_date")
     private LocalDateTime endDate;
 
+    @Column(name = "time")
+    private int time;
+
     @Column(name = "test_id")
     @JsonIgnore
     private int testId;
@@ -52,6 +55,14 @@ public class Submission {
 
     public void setEndDate(LocalDateTime endDate) {
         this.endDate = endDate;
+    }
+
+    public int getTime() {
+        return time;
+    }
+
+    public void setTime(int time) {
+        this.time = time;
     }
 
     public int getTestId() {
