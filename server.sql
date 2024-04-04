@@ -11,11 +11,30 @@
  Target Server Version : 50742
  File Encoding         : 65001
 
- Date: 04/04/2024 10:47:02
+ Date: 04/04/2024 21:46:55
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for answer_in_submission
+-- ----------------------------
+DROP TABLE IF EXISTS `answer_in_submission`;
+CREATE TABLE `answer_in_submission`  (
+  `submission_id` int(11) NOT NULL,
+  `question_id` int(11) NOT NULL,
+  `answer` varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci NULL DEFAULT NULL,
+  `is_pass` int(11) NULL DEFAULT 0,
+  PRIMARY KEY (`submission_id`, `question_id`) USING BTREE,
+  INDEX `question_id`(`question_id`) USING BTREE,
+  CONSTRAINT `answer_in_submission_ibfk_1` FOREIGN KEY (`submission_id`) REFERENCES `submission` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `answer_in_submission_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `question` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of answer_in_submission
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for children_do_test
@@ -46,7 +65,7 @@ CREATE TABLE `choice`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `question_id`(`question_id`) USING BTREE,
   CONSTRAINT `choice_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `question` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 123 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 140 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of choice
@@ -188,7 +207,7 @@ CREATE TABLE `question`  (
   INDEX `test_id`(`test_id`) USING BTREE,
   INDEX `answer_id`(`answer_id`) USING BTREE,
   CONSTRAINT `question_ibfk_2` FOREIGN KEY (`test_id`) REFERENCES `test` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 46 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 52 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of question
@@ -243,7 +262,7 @@ CREATE TABLE `submission`  (
   INDEX `children_id`(`children_id`) USING BTREE,
   CONSTRAINT `submission_ibfk_1` FOREIGN KEY (`test_id`) REFERENCES `test` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `submission_ibfk_2` FOREIGN KEY (`children_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of submission
@@ -294,7 +313,7 @@ CREATE TABLE `test`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `parent_id`(`parent_id`) USING BTREE,
   CONSTRAINT `test_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 25 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 27 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of test
