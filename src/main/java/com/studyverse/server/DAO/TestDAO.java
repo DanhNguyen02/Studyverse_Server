@@ -393,6 +393,7 @@ public class TestDAO {
             String endDateString = (String) body.get("endDate");
             LocalDateTime endDate = LocalDateTime.parse(endDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
+            int time = SafeConvert.safeConvertToInt(body.get("time"));
             int testId = SafeConvert.safeConvertToInt(body.get("testId"));
             int childrenId = SafeConvert.safeConvertToInt(body.get("childrenId"));
 
@@ -400,6 +401,7 @@ public class TestDAO {
 
             submission.setStartDate(startDate);
             submission.setEndDate(endDate);
+            submission.setTime(time);
             submission.setTestId(testId);
             submission.setChildrenId(childrenId);
 
@@ -452,102 +454,113 @@ public class TestDAO {
         return true;
     }
 
-//    public boolean updateTest(Integer id, Map<String, Object> body) {
-//        Transaction transaction = null;
-//        try (Session session = sessionFactory.openSession()) {
-//            transaction = session.beginTransaction();
-//
-//            String name = (String) body.get("name");
-//            String description = (String) body.get("description");
-//            int time = SafeConvert.safeConvertToInt(body.get("time"));
-//            int questionCount = SafeConvert.safeConvertToInt(body.get("questionCount"));
-//            int questionCountToPass = SafeConvert.safeConvertToInt(body.get("questionCountToPass"));
-//            int parentId = SafeConvert.safeConvertToInt(body.get("parentId"));
-//            String startDateString = (String) body.get("startDate");
-//            String endDateString = (String) body.get("endDate");
-//
-//            LocalDateTime startDate = LocalDateTime.parse(startDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-//            LocalDateTime endDate = LocalDateTime.parse(endDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-//
-//            // Convert childrenIdList string to list
-//            List<Integer> childrenIds = new ArrayList<>();
-//            if (body.get("childrenIds") instanceof String childrenIdsString) {
-//                childrenIdsString = childrenIdsString.replaceAll("\\[|\\]|\\s", "");
-//                String[] ids = childrenIdsString.split(",");
-//                for (String childrenId : ids) {
-//                    childrenIds.add(Integer.parseInt(childrenId.trim()));
-//                }
-//            } else if (body.get("childrenIds") instanceof List<?>) {
-//                for (Object childrenId : (List<?>) body.get("childrenIds")) {
-//                    childrenIds.add((Integer) childrenId);
-//                }
-//            }
-//
-//            // Update records into children_do_test table
-//            session.createNativeQuery("delete from children_do_test where test_id = :testId")
-//                    .setParameter("testId", id)
-//                    .executeUpdate();
-//
-//            for (Integer childrenId : childrenIds) {
-//                String sql = "insert into children_do_test (children_id, test_id) values (:childrenId, :testId)";
-//
-//                session.createNativeQuery(sql)
-//                        .setParameter("childrenId", childrenId)
-//                        .setParameter("testId", id)
-//                        .executeUpdate();
-//            }
-//
-//            // Convert tagList string to list
-//            List<Integer> tags = new ArrayList<>();
-//            if (body.get("tags") instanceof String tagsString) {
-//                tagsString = tagsString.replaceAll("\\[|\\]|\\s", "");
-//                String[] tagList = tagsString.split(",");
-//                for (String tagId : tagList) {
-//                    tags.add(Integer.parseInt(tagId.trim()));
-//                }
-//            } else if (body.get("tags") instanceof List<?>) {
-//                for (Object tagId : (List<?>) body.get("tags")) {
-//                    tags.add((Integer) tagId);
-//                }
-//            }
-//
-//            // Update records in test_have_tag table
-//            session.createNativeQuery("delete from test_have_tag where test_id = :testId")
-//                    .setParameter("testId", id)
-//                    .executeUpdate();
-//
-//            for (Integer tag : tags) {
-//                String sql = "insert into test_have_tag (tag_id, test_id) values (:tag, :testId)";
-//
-//                session.createNativeQuery(sql)
-//                        .setParameter("tag", tag)
-//                        .setParameter("testId", id)
-//                        .executeUpdate();
-//            }
-//
-//            // Update questions
+    public boolean updateTest(Integer id, Map<String, Object> body) {
+        Transaction transaction = null;
+        try (Session session = sessionFactory.openSession()) {
+            transaction = session.beginTransaction();
+
+            String name = (String) body.get("name");
+            String description = (String) body.get("description");
+            int time = SafeConvert.safeConvertToInt(body.get("time"));
+            int questionCount = SafeConvert.safeConvertToInt(body.get("questionCount"));
+            int questionCountToPass = SafeConvert.safeConvertToInt(body.get("questionCountToPass"));
+            String startDateString = (String) body.get("startDate");
+            String endDateString = (String) body.get("endDate");
+
+            LocalDateTime startDate = LocalDateTime.parse(startDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            LocalDateTime endDate = LocalDateTime.parse(endDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+            Test test = session.get(Test.class, id);
+
+            if (test != null) {
+                test.setName(name);
+                test.setDescription(description);
+                test.setTime(time);
+                test.setQuestionCount(questionCount);
+                test.setQuestionCountToPass(questionCountToPass);
+                test.setStartDate(startDate);
+                test.setEndDate(endDate);
+
+                session.update(test);
+            }
+
+            // Convert childrenIdList string to list
+            List<Integer> childrenIds = new ArrayList<>();
+            if (body.get("childrenIds") instanceof String childrenIdsString) {
+                childrenIdsString = childrenIdsString.replaceAll("\\[|\\]|\\s", "");
+                String[] ids = childrenIdsString.split(",");
+                for (String childrenId : ids) {
+                    childrenIds.add(Integer.parseInt(childrenId.trim()));
+                }
+            } else if (body.get("childrenIds") instanceof List<?>) {
+                for (Object childrenId : (List<?>) body.get("childrenIds")) {
+                    childrenIds.add((Integer) childrenId);
+                }
+            }
+
+            // Update records into children_do_test table
+            session.createNativeQuery("delete from children_do_test where test_id = :testId")
+                    .setParameter("testId", id)
+                    .executeUpdate();
+
+            for (Integer childrenId : childrenIds) {
+                String sql = "insert into children_do_test (children_id, test_id) values (:childrenId, :testId)";
+
+                session.createNativeQuery(sql)
+                        .setParameter("childrenId", childrenId)
+                        .setParameter("testId", id)
+                        .executeUpdate();
+            }
+
+            // Convert tagList string to list
+            List<Integer> tags = new ArrayList<>();
+            if (body.get("tags") instanceof String tagsString) {
+                tagsString = tagsString.replaceAll("\\[|\\]|\\s", "");
+                String[] tagList = tagsString.split(",");
+                for (String tagId : tagList) {
+                    tags.add(Integer.parseInt(tagId.trim()));
+                }
+            } else if (body.get("tags") instanceof List<?>) {
+                for (Object tagId : (List<?>) body.get("tags")) {
+                    tags.add((Integer) tagId);
+                }
+            }
+
+            // Update records in test_have_tag table
+            session.createNativeQuery("delete from test_have_tag where test_id = :testId")
+                    .setParameter("testId", id)
+                    .executeUpdate();
+
+            for (Integer tag : tags) {
+                String sql = "insert into test_have_tag (tag_id, test_id) values (:tag, :testId)";
+
+                session.createNativeQuery(sql)
+                        .setParameter("tag", tag)
+                        .setParameter("testId", id)
+                        .executeUpdate();
+            }
+
+            // Update questions
 //            if (body.get("questions") instanceof String questionsString) {
 //                updateQuestionsString(questionsString, session, id);
 //            } else if (body.get("questions") instanceof List<?>) {
 //                for (Object questionObj : (List<?>) body.get("questions")) {
 //                    Map<String, Object> questionMap = (Map<String, Object>) questionObj;
-////                    Question question = convertMapToQuestion(questionMap, session, id);
-////                    questions.add(question);
 //                    updateQuestionMap(questionMap, session, id);
 //                }
 //            }
-//
-//            transaction.commit();
-//
-//            return true;
-//        } catch (Exception e) {
-//            if (transaction != null) {
-//                transaction.rollback();
-//            }
-//            e.printStackTrace();
-//            return false;
-//        }
-//    }
+
+            transaction.commit();
+
+            return true;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return false;
+        }
+    }
 
 //    public void updateQuestionsString(String questionString, Session session, Integer testId) {
 //        Transaction transaction = session.getTransaction();

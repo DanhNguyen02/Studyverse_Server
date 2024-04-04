@@ -11,7 +11,7 @@
  Target Server Version : 50742
  File Encoding         : 65001
 
- Date: 02/04/2024 21:30:32
+ Date: 04/04/2024 10:47:02
 */
 
 SET NAMES utf8mb4;
@@ -33,7 +33,6 @@ CREATE TABLE `children_do_test`  (
 -- ----------------------------
 -- Records of children_do_test
 -- ----------------------------
-INSERT INTO `children_do_test` VALUES (4, 23);
 
 -- ----------------------------
 -- Table structure for choice
@@ -47,19 +46,11 @@ CREATE TABLE `choice`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `question_id`(`question_id`) USING BTREE,
   CONSTRAINT `choice_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `question` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 115 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 123 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of choice
 -- ----------------------------
-INSERT INTO `choice` VALUES (107, '1', '', 42);
-INSERT INTO `choice` VALUES (108, '2', '', 42);
-INSERT INTO `choice` VALUES (109, '3', '', 42);
-INSERT INTO `choice` VALUES (110, '4', '', 42);
-INSERT INTO `choice` VALUES (111, '1', '', 43);
-INSERT INTO `choice` VALUES (112, '2', '', 43);
-INSERT INTO `choice` VALUES (113, '3', '', 43);
-INSERT INTO `choice` VALUES (114, '4', '', 43);
 
 -- ----------------------------
 -- Table structure for choice_in_submission
@@ -80,8 +71,6 @@ CREATE TABLE `choice_in_submission`  (
 -- ----------------------------
 -- Records of choice_in_submission
 -- ----------------------------
-INSERT INTO `choice_in_submission` VALUES (2, 42, 108);
-INSERT INTO `choice_in_submission` VALUES (2, 43, 111);
 
 -- ----------------------------
 -- Table structure for event
@@ -188,7 +177,7 @@ INSERT INTO `message` VALUES (7, 'Buồn k ông cháu ơi', b'0', 3, 1, '2024-03
 DROP TABLE IF EXISTS `question`;
 CREATE TABLE `question`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `content` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `description` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `suggest` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `image` blob NULL,
@@ -199,13 +188,11 @@ CREATE TABLE `question`  (
   INDEX `test_id`(`test_id`) USING BTREE,
   INDEX `answer_id`(`answer_id`) USING BTREE,
   CONSTRAINT `question_ibfk_2` FOREIGN KEY (`test_id`) REFERENCES `test` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 44 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 46 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of question
 -- ----------------------------
-INSERT INTO `question` VALUES (42, 'Câu 1', 'Câu 1', 'Kỳ sau sẽ biết', '', 108, 1, 23);
-INSERT INTO `question` VALUES (43, 'Câu 2', 'Câu 2', 'Kỳ sau sẽ biết', '', 113, 1, 23);
 
 -- ----------------------------
 -- Table structure for question_have_tag
@@ -223,10 +210,6 @@ CREATE TABLE `question_have_tag`  (
 -- ----------------------------
 -- Records of question_have_tag
 -- ----------------------------
-INSERT INTO `question_have_tag` VALUES (42, 1);
-INSERT INTO `question_have_tag` VALUES (43, 1);
-INSERT INTO `question_have_tag` VALUES (42, 13);
-INSERT INTO `question_have_tag` VALUES (43, 13);
 
 -- ----------------------------
 -- Table structure for remind_event
@@ -252,6 +235,7 @@ CREATE TABLE `submission`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `start_date` datetime NULL DEFAULT NULL,
   `end_date` datetime NULL DEFAULT NULL,
+  `time` int(11) NULL DEFAULT NULL,
   `test_id` int(11) NULL DEFAULT NULL,
   `children_id` int(11) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
@@ -259,12 +243,11 @@ CREATE TABLE `submission`  (
   INDEX `children_id`(`children_id`) USING BTREE,
   CONSTRAINT `submission_ibfk_1` FOREIGN KEY (`test_id`) REFERENCES `test` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `submission_ibfk_2` FOREIGN KEY (`children_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of submission
 -- ----------------------------
-INSERT INTO `submission` VALUES (2, '2024-04-03 14:00:00', '2024-04-03 15:00:00', 23, 4);
 
 -- ----------------------------
 -- Table structure for tag
@@ -311,12 +294,11 @@ CREATE TABLE `test`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `parent_id`(`parent_id`) USING BTREE,
   CONSTRAINT `test_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB AUTO_INCREMENT = 24 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 25 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of test
 -- ----------------------------
-INSERT INTO `test` VALUES (23, 'Kiểm tra cuối kỳ PPL', 'Kỳ sau làm lại', 90, 60, 30, '2024-04-02 12:34:56', '2024-04-09 12:34:56', 1);
 
 -- ----------------------------
 -- Table structure for test_have_tag
@@ -334,8 +316,6 @@ CREATE TABLE `test_have_tag`  (
 -- ----------------------------
 -- Records of test_have_tag
 -- ----------------------------
-INSERT INTO `test_have_tag` VALUES (23, 1);
-INSERT INTO `test_have_tag` VALUES (23, 13);
 
 -- ----------------------------
 -- Table structure for user
