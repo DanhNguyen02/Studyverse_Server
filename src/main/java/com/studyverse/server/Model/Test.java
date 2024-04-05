@@ -20,9 +20,6 @@ public class Test {
     @Column(name = "time")
     private int time;
 
-    @Column(name = "question_count")
-    private int questionCount;
-
     @Column(name = "question_count_to_pass")
     private int questionCountToPass;
 
@@ -74,14 +71,6 @@ public class Test {
 
     public void setTime(int time) {
         this.time = time;
-    }
-
-    public int getQuestionCount() {
-        return questionCount;
-    }
-
-    public void setQuestionCount(int questionCount) {
-        this.questionCount = questionCount;
     }
 
     public int getQuestionCountToPass() {
@@ -147,7 +136,6 @@ public class Test {
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", time=" + time +
-                ", questionCount=" + questionCount +
                 ", questionCountToPass=" + questionCountToPass +
                 ", parentId=" + parentId +
                 ", questions=" + questions +
