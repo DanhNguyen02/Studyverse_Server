@@ -31,7 +31,7 @@ public class Submission {
     private int childrenId;
 
     @Transient
-    private Map<Integer, Choice> answers;
+    private Map<Integer, Object> answers;
 
     public int getId() {
         return id;
@@ -81,11 +81,11 @@ public class Submission {
         this.childrenId = childrenId;
     }
 
-    public Map<Integer, Choice> getAnswers() {
+    public Map<Integer, Object> getAnswers() {
         return answers;
     }
 
-    public void setAnswers(Map<Integer, Choice> answers) {
+    public void setAnswers(Map<Integer, Object> answers) {
         this.answers = answers;
     }
 }
