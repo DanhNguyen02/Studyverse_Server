@@ -11,7 +11,7 @@
  Target Server Version : 50742
  File Encoding         : 65001
 
- Date: 05/04/2024 15:56:37
+ Date: 05/04/2024 20:42:41
 */
 
 SET NAMES utf8mb4;
@@ -305,7 +305,6 @@ CREATE TABLE `test`  (
   `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `description` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `time` int(11) NULL DEFAULT NULL,
-  `question_count` int(11) NULL DEFAULT NULL,
   `question_count_to_pass` int(11) NULL DEFAULT NULL,
   `start_date` datetime NULL DEFAULT NULL,
   `end_date` datetime NULL DEFAULT NULL,
