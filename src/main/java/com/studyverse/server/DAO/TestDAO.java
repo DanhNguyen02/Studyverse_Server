@@ -31,7 +31,6 @@ public class TestDAO {
             String name = (String) body.get("name");
             String description = (String) body.get("description");
             int time = SafeConvert.safeConvertToInt(body.get("time"));
-            int questionCount = SafeConvert.safeConvertToInt(body.get("questionCount"));
             int questionCountToPass = SafeConvert.safeConvertToInt(body.get("questionCountToPass"));
             int parentId = SafeConvert.safeConvertToInt(body.get("parentId"));
             String startDateString = (String) body.get("startDate");
@@ -73,7 +72,6 @@ public class TestDAO {
             test.setName(name);
             test.setDescription(description);
             test.setTime(time);
-            test.setQuestionCount(questionCount);
             test.setQuestionCountToPass(questionCountToPass);
             test.setStartDate(startDate);
             test.setEndDate(endDate);
@@ -505,7 +503,6 @@ public class TestDAO {
             String name = (String) body.get("name");
             String description = (String) body.get("description");
             int time = SafeConvert.safeConvertToInt(body.get("time"));
-            int questionCount = SafeConvert.safeConvertToInt(body.get("questionCount"));
             int questionCountToPass = SafeConvert.safeConvertToInt(body.get("questionCountToPass"));
             String startDateString = (String) body.get("startDate");
             String endDateString = (String) body.get("endDate");
@@ -519,7 +516,6 @@ public class TestDAO {
                 test.setName(name);
                 test.setDescription(description);
                 test.setTime(time);
-                test.setQuestionCount(questionCount);
                 test.setQuestionCountToPass(questionCountToPass);
                 test.setStartDate(startDate);
                 test.setEndDate(endDate);
