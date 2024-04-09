@@ -14,7 +14,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,8 +38,11 @@ public class TestDAO {
             String startDateString = (String) body.get("startDate");
             String endDateString = (String) body.get("endDate");
 
-            LocalDateTime startDate = LocalDateTime.parse(startDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-            LocalDateTime endDate = LocalDateTime.parse(endDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            Instant startDateInstant = Instant.parse(startDateString);
+            Instant endDateInstant = Instant.parse(endDateString);
+
+            LocalDateTime startDate = LocalDateTime.ofInstant(startDateInstant, ZoneId.of("UTC"));
+            LocalDateTime endDate = LocalDateTime.ofInstant(endDateInstant, ZoneId.of("UTC"));
 
             // Convert childrenIdList string to list
             List<Integer> childrenIds = new ArrayList<>();
@@ -174,7 +179,7 @@ public class TestDAO {
                 question.setImage(imageBytes);
             }
             else question.setImage(new byte[0]);
-            int answerIndex = SafeConvert.safeConvertToInt(questionMap.get("answerId"));
+            int answerIndex = questionMap.get("answerId") != null ? SafeConvert.safeConvertToInt(questionMap.get("answerId")) : -1;
             question.setType(SafeConvert.safeConvertToInt(questionMap.get("type")));
             question.setTestId(testId);
 
@@ -205,7 +210,9 @@ public class TestDAO {
                         .executeUpdate();
             }
 
-            List<Map<String, Object>> choicesList = (List<Map<String, Object>>) questionMap.get("choices");
+            List<Map<String, Object>> choicesList = questionMap.get("choices") != null ?
+                    (List<Map<String, Object>>) questionMap.get("choices") :
+                    new ArrayList<>();
             List<Choice> choices = new ArrayList<>();
 
             int index = 0;
@@ -403,10 +410,13 @@ public class TestDAO {
             transaction = session.beginTransaction();
 
             String startDateString = (String) body.get("startDate");
-            LocalDateTime startDate = LocalDateTime.parse(startDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-
             String endDateString = (String) body.get("endDate");
-            LocalDateTime endDate = LocalDateTime.parse(endDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+            Instant startDateInstant = Instant.parse(startDateString);
+            Instant endDateInstant = Instant.parse(endDateString);
+
+            LocalDateTime startDate = LocalDateTime.ofInstant(startDateInstant, ZoneId.of("UTC"));
+            LocalDateTime endDate = LocalDateTime.ofInstant(endDateInstant, ZoneId.of("UTC"));
 
             int time = SafeConvert.safeConvertToInt(body.get("time"));
             int testId = SafeConvert.safeConvertToInt(body.get("testId"));
@@ -432,13 +442,15 @@ public class TestDAO {
                     if (question.has("choiceId")) {
                         int choiceId = SafeConvert.safeConvertToInt(question.get("choiceId"));
 
-                        String sql = "insert into choice_in_submission (submission_id, question_id, choice_id) values (:submissionId, :questionId, :choiceId)";
+                        if (choiceId != -1) {
+                            String sql = "insert into choice_in_submission (submission_id, question_id, choice_id) values (:submissionId, :questionId, :choiceId)";
 
-                        session.createNativeQuery(sql)
-                                .setParameter("submissionId", submission.getId())
-                                .setParameter("questionId", questionId)
-                                .setParameter("choiceId", choiceId)
-                                .executeUpdate();
+                            session.createNativeQuery(sql)
+                                    .setParameter("submissionId", submission.getId())
+                                    .setParameter("questionId", questionId)
+                                    .setParameter("choiceId", choiceId)
+                                    .executeUpdate();
+                        }
                     }
                     else if (question.has("answer")) {
                         String answer = (String) question.get("answer");
@@ -461,13 +473,15 @@ public class TestDAO {
                     if (questionMap.containsKey("choiceId")) {
                         int choiceId = SafeConvert.safeConvertToInt(questionMap.get("choiceId").toString());
 
-                        String sql = "insert into choice_in_submission (submission_id, question_id, choice_id) values (:submissionId, :questionId, :choiceId)";
+                        if (choiceId != -1) {
+                            String sql = "insert into choice_in_submission (submission_id, question_id, choice_id) values (:submissionId, :questionId, :choiceId)";
 
-                        session.createNativeQuery(sql)
-                                .setParameter("submissionId", submission.getId())
-                                .setParameter("questionId", questionId)
-                                .setParameter("choiceId", choiceId)
-                                .executeUpdate();
+                            session.createNativeQuery(sql)
+                                    .setParameter("submissionId", submission.getId())
+                                    .setParameter("questionId", questionId)
+                                    .setParameter("choiceId", choiceId)
+                                    .executeUpdate();
+                        }
                     }
                     else if (questionMap.containsKey("answer")) {
                         String answer = (String) questionMap.get("answer");
@@ -507,8 +521,11 @@ public class TestDAO {
             String startDateString = (String) body.get("startDate");
             String endDateString = (String) body.get("endDate");
 
-            LocalDateTime startDate = LocalDateTime.parse(startDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-            LocalDateTime endDate = LocalDateTime.parse(endDateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            Instant startDateInstant = Instant.parse(startDateString);
+            Instant endDateInstant = Instant.parse(endDateString);
+
+            LocalDateTime startDate = LocalDateTime.ofInstant(startDateInstant, ZoneId.of("UTC"));
+            LocalDateTime endDate = LocalDateTime.ofInstant(endDateInstant, ZoneId.of("UTC"));
 
             Test test = session.get(Test.class, id);
 

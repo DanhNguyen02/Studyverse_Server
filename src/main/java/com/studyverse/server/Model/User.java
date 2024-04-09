@@ -38,6 +38,21 @@ public class User {
         this.dob = dob;
     }
 
+    public User(int id, String email, String firstName, String lastName, String phone, String avatar, String nickName, String role, String userStatus, boolean accountStatus, Date dob, Boolean isFamilyHost) {
+        this.id = id;
+        this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phone = phone;
+        this.avatar = avatar;
+        this.nickName = nickName;
+        this.role = role;
+        this.userStatus = userStatus;
+        this.accountStatus = accountStatus;
+        this.dob = dob;
+        this.isFamilyHost = isFamilyHost;
+    }
+
     public User(String email, String password) {
         this.email = email;
         this.password = password;
