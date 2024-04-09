@@ -442,13 +442,15 @@ public class TestDAO {
                     if (question.has("choiceId")) {
                         int choiceId = SafeConvert.safeConvertToInt(question.get("choiceId"));
 
-                        String sql = "insert into choice_in_submission (submission_id, question_id, choice_id) values (:submissionId, :questionId, :choiceId)";
+                        if (choiceId != -1) {
+                            String sql = "insert into choice_in_submission (submission_id, question_id, choice_id) values (:submissionId, :questionId, :choiceId)";
 
-                        session.createNativeQuery(sql)
-                                .setParameter("submissionId", submission.getId())
-                                .setParameter("questionId", questionId)
-                                .setParameter("choiceId", choiceId)
-                                .executeUpdate();
+                            session.createNativeQuery(sql)
+                                    .setParameter("submissionId", submission.getId())
+                                    .setParameter("questionId", questionId)
+                                    .setParameter("choiceId", choiceId)
+                                    .executeUpdate();
+                        }
                     }
                     else if (question.has("answer")) {
                         String answer = (String) question.get("answer");
@@ -471,13 +473,15 @@ public class TestDAO {
                     if (questionMap.containsKey("choiceId")) {
                         int choiceId = SafeConvert.safeConvertToInt(questionMap.get("choiceId").toString());
 
-                        String sql = "insert into choice_in_submission (submission_id, question_id, choice_id) values (:submissionId, :questionId, :choiceId)";
+                        if (choiceId != -1) {
+                            String sql = "insert into choice_in_submission (submission_id, question_id, choice_id) values (:submissionId, :questionId, :choiceId)";
 
-                        session.createNativeQuery(sql)
-                                .setParameter("submissionId", submission.getId())
-                                .setParameter("questionId", questionId)
-                                .setParameter("choiceId", choiceId)
-                                .executeUpdate();
+                            session.createNativeQuery(sql)
+                                    .setParameter("submissionId", submission.getId())
+                                    .setParameter("questionId", questionId)
+                                    .setParameter("choiceId", choiceId)
+                                    .executeUpdate();
+                        }
                     }
                     else if (questionMap.containsKey("answer")) {
                         String answer = (String) questionMap.get("answer");
