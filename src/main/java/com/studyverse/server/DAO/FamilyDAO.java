@@ -159,6 +159,9 @@ public class FamilyDAO {
 
     public List<User> getFamilyMembers(String familyId) {
         if (familyId.equals("0")) return new ArrayList<>();
+
+        Family family = getFamilyById(familyId);
+
         String sql = "select * from user where family_id = ?";
         return jdbcTemplate.query(
             sql,
@@ -174,7 +177,8 @@ public class FamilyDAO {
                     rs.getBoolean("role") ? "parent" : "children",
                     rs.getString("user_status"),
                     rs.getBoolean("account_status"),
-                    rs.getDate("dob")
+                    rs.getDate("dob"),
+                    rs.getString("email").equals(family.getEmail())
                 );
                 Timestamp lastLogin = rs.getTimestamp("last_login");
                 if (lastLogin != null) user.setLastLogin(lastLogin.toLocalDateTime());
