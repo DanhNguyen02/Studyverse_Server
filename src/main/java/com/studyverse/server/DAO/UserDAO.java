@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @Repository
@@ -59,7 +60,9 @@ public class UserDAO {
     }
 
     public boolean handleLogOut(String email) {
-        LocalDateTime now = LocalDateTime.now();
+        ZoneId zid = ZoneId.of("Asia/Ho_Chi_Minh");
+
+        LocalDateTime now = LocalDateTime.now(zid);
 
         String sql = "update user set account_status = 0, last_login = ? where email = ?";
         int rowsAffected = jdbcTemplate.update(sql, now, email);

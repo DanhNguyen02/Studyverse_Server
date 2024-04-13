@@ -41,8 +41,8 @@ public class TestDAO {
             Instant startDateInstant = Instant.parse(startDateString);
             Instant endDateInstant = Instant.parse(endDateString);
 
-            LocalDateTime startDate = LocalDateTime.ofInstant(startDateInstant, ZoneId.of("UTC"));
-            LocalDateTime endDate = LocalDateTime.ofInstant(endDateInstant, ZoneId.of("UTC"));
+            LocalDateTime startDate = LocalDateTime.ofInstant(startDateInstant, ZoneId.of("Asia/Ho_Chi_Minh"));
+            LocalDateTime endDate = LocalDateTime.ofInstant(endDateInstant, ZoneId.of("Asia/Ho_Chi_Minh"));
 
             // Convert childrenIdList string to list
             List<Integer> childrenIds = new ArrayList<>();
@@ -147,7 +147,7 @@ public class TestDAO {
                 }
 
                 int answerIndex = question.getAnswerId();
-                int index = 0;
+                int index = 1;
                 for (Choice choice : question.getChoices()) {
                     choice.setQuestionId(question.getId());
 
@@ -215,7 +215,7 @@ public class TestDAO {
                     new ArrayList<>();
             List<Choice> choices = new ArrayList<>();
 
-            int index = 0;
+            int index = 1;
             for (Map<String, Object> choiceMap : choicesList) {
                 Choice choice = new Choice();
                 choice.setContent((String) choiceMap.get("content"));
@@ -415,8 +415,8 @@ public class TestDAO {
             Instant startDateInstant = Instant.parse(startDateString);
             Instant endDateInstant = Instant.parse(endDateString);
 
-            LocalDateTime startDate = LocalDateTime.ofInstant(startDateInstant, ZoneId.of("UTC"));
-            LocalDateTime endDate = LocalDateTime.ofInstant(endDateInstant, ZoneId.of("UTC"));
+            LocalDateTime startDate = LocalDateTime.ofInstant(startDateInstant, ZoneId.of("Asia/Ho_Chi_Minh"));
+            LocalDateTime endDate = LocalDateTime.ofInstant(endDateInstant, ZoneId.of("Asia/Ho_Chi_Minh"));
 
             int time = SafeConvert.safeConvertToInt(body.get("time"));
             int testId = SafeConvert.safeConvertToInt(body.get("testId"));
@@ -439,7 +439,7 @@ public class TestDAO {
                     JSONObject question = questions.getJSONObject(i);
 
                     int questionId = SafeConvert.safeConvertToInt(question.get("id"));
-                    if (question.has("choiceId")) {
+                    if (question.get("choiceId") != null) {
                         int choiceId = SafeConvert.safeConvertToInt(question.get("choiceId"));
 
                         if (choiceId != -1) {
@@ -452,7 +452,7 @@ public class TestDAO {
                                     .executeUpdate();
                         }
                     }
-                    else if (question.has("answer")) {
+                    else if (question.get("answer") != null) {
                         String answer = (String) question.get("answer");
 
                         String sql = "insert into answer_in_submission (submission_id, question_id, answer) values (:submissionId, :questionId, :answer)";
@@ -470,7 +470,7 @@ public class TestDAO {
 
                 for (Map<String, Object> questionMap : questionsList) {
                     int questionId = SafeConvert.safeConvertToInt(questionMap.get("id").toString());
-                    if (questionMap.containsKey("choiceId")) {
+                    if (questionMap.get("choiceId") != null) {
                         int choiceId = SafeConvert.safeConvertToInt(questionMap.get("choiceId").toString());
 
                         if (choiceId != -1) {
@@ -483,7 +483,7 @@ public class TestDAO {
                                     .executeUpdate();
                         }
                     }
-                    else if (questionMap.containsKey("answer")) {
+                    else if (questionMap.get("answer") != null) {
                         String answer = (String) questionMap.get("answer");
 
                         String sql = "insert into answer_in_submission (submission_id, question_id, answer) values (:submissionId, :questionId, :answer)";
