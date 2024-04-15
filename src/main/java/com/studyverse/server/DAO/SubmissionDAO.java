@@ -35,11 +35,13 @@ public class SubmissionDAO {
 
                     String sql = "update answer_in_submission set is_pass = :isPass where submission_id = :submissionId and question_id = :questionId";
 
-                    session.createNativeQuery(sql)
+                    int rowsAffected = session.createNativeQuery(sql)
                             .setParameter("isPass", isPass)
                             .setParameter("submissionId", submissionId)
                             .setParameter("questionId", questionId)
                             .executeUpdate();
+
+                    if (rowsAffected != 0) return false;
                 }
             }
 
@@ -52,11 +54,13 @@ public class SubmissionDAO {
 
                     String sql = "update answer_in_submission set is_pass = :isPass where submission_id = :submissionId and question_id = :questionId";
 
-                    session.createNativeQuery(sql)
+                    int rowsAffected = session.createNativeQuery(sql)
                             .setParameter("isPass", isPass)
                             .setParameter("submissionId", submissionId)
                             .setParameter("questionId", questionId)
                             .executeUpdate();
+
+                    if (rowsAffected == 0) return false;
                 }
             }
 

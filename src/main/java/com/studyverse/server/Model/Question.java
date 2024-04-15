@@ -16,14 +16,11 @@ public class Question {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "description")
-    private String description;
-
     @Column(name = "suggest")
     private String suggest;
 
     @Column(name = "image")
-    private byte[] image;
+    private String image;
 
     @Column(name = "answer_id")
     @JsonIgnore
@@ -61,14 +58,6 @@ public class Question {
         this.name = name;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getSuggest() {
         return suggest;
     }
@@ -77,11 +66,11 @@ public class Question {
         this.suggest = suggest;
     }
 
-    public byte[] getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(byte[] image) {
+    public void setImage(String image) {
         this.image = image;
     }
 
@@ -138,9 +127,8 @@ public class Question {
         return "Question{" +
                 "id=" + id +
                 ", content='" + name + '\'' +
-                ", description='" + description + '\'' +
                 ", suggest='" + suggest + '\'' +
-                ", image='" + Arrays.toString(image) + '\'' +
+                ", image='" + image + '\'' +
                 ", answerId=" + answerId +
                 ", type=" + type +
                 ", answers=" + choices +
