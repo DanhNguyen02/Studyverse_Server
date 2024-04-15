@@ -171,14 +171,9 @@ public class TestDAO {
         try {
             Question question = new Question();
             question.setName((String) questionMap.get("name"));
-            question.setDescription((String) questionMap.get("description"));
             question.setSuggest((String) questionMap.get("suggest"));
-            String questionImageDataBase64 = (String) questionMap.get("image");
-            if (questionImageDataBase64 != null && !questionImageDataBase64.isEmpty()) {
-                byte[] imageBytes = Base64.getDecoder().decode(questionImageDataBase64);
-                question.setImage(imageBytes);
-            }
-            else question.setImage(new byte[0]);
+            question.setImage((String) questionMap.get("image"));
+
             int answerIndex = questionMap.get("answerId") != null ? SafeConvert.safeConvertToInt(questionMap.get("answerId")) : -1;
             question.setType(SafeConvert.safeConvertToInt(questionMap.get("type")));
             question.setTestId(testId);
@@ -219,12 +214,7 @@ public class TestDAO {
             for (Map<String, Object> choiceMap : choicesList) {
                 Choice choice = new Choice();
                 choice.setContent((String) choiceMap.get("content"));
-                String choiceImageDataBase64 = (String) questionMap.get("image");
-                if (choiceImageDataBase64 != null && !choiceImageDataBase64.isEmpty()) {
-                    byte[] imageBytes = Base64.getDecoder().decode(choiceImageDataBase64);
-                    choice.setImage(imageBytes);
-                }
-                else choice.setImage(new byte[0]);
+                choice.setImage((String) questionMap.get("image"));
 
                 choice.setQuestionId(question.getId());
 
@@ -642,7 +632,6 @@ public class TestDAO {
 //                    .uniqueResult();
 //
 //            String name = (String) questionMap.get("name");
-//            String description = (String) questionMap.get("description");
 //            String suggest = (String) questionMap.get("suggest");
 //            byte[] image = null;
 //            String questionImageDataBase64 = (String) questionMap.get("image");

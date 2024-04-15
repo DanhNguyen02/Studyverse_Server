@@ -16,7 +16,7 @@ public class Choice {
     private String content;
 
     @Column(name = "image")
-    private byte[] image;
+    private String image;
 
     @Column(name = "question_id")
     @JsonIgnore
@@ -38,11 +38,11 @@ public class Choice {
         this.content = content;
     }
 
-    public byte[] getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(byte[] image) {
+    public void setImage(String image) {
         this.image = image;
     }
 
@@ -59,7 +59,7 @@ public class Choice {
         return "Answer{" +
                 "id=" + id +
                 ", content='" + content + '\'' +
-                ", image='" + Arrays.toString(image) + '\'' +
+                ", image='" + image + '\'' +
                 '}';
     }
 }
