@@ -15,12 +15,12 @@ public class StudyPlanController {
     @Autowired
     private StudyPlanDAO studyPlanDAO;
 
-    @GetMapping("/")
-    public Map<Integer, List<StudyPlan>> getAllStudyPlans() {
-        return studyPlanDAO.getAllStudyPlans();
+    @GetMapping("/{familyId}")
+    public Map<Integer, List<StudyPlan>> getAllStudyPlans(@PathVariable("familyId") Integer familyId) {
+        return studyPlanDAO.getAllStudyPlans(familyId);
     }
 
-    @PostMapping("/")
+    @PostMapping("/create")
     public Map<String, String> createStudyPlan(@RequestBody HashMap<String, Object> body) {
         Map<String, String> response = new HashMap<>();
 

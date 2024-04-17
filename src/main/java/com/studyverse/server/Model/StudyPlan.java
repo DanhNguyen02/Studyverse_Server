@@ -19,6 +19,9 @@ public class StudyPlan {
     @Column(name = "end_date")
     private Date endDate;
 
+    @Column(name = "subject_id")
+    private int subjectId;
+
     public int getId() {
         return id;
     }
@@ -49,5 +52,13 @@ public class StudyPlan {
 
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
+    }
+
+    public int getSubjectId() {
+        return subjectId;
+    }
+
+    public void setSubjectId(int subjectId) {
+        this.subjectId = subjectId;
     }
 }
