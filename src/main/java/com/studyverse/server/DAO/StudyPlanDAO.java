@@ -94,6 +94,54 @@ public class StudyPlanDAO {
         try (Session session = sessionFactory.openSession()) {
             transaction = session.beginTransaction();
 
+            String name = (String) body.get("name");
+
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            Date startDate = sdf.parse((String) body.get("startDate"));
+            Date endDate = sdf.parse((String) body.get("endDate"));
+
+            int subjectId = SafeConvert.safeConvertToInt(body.get("subjectId"));
+
+            // Convert childrenIdList string to list
+            List<Integer> childrenIds = new ArrayList<>();
+            if (body.get("childrenIds") instanceof String childrenIdsString) {
+                childrenIdsString = childrenIdsString.replaceAll("\\[|\\]|\\s", "");
+                String[] ids = childrenIdsString.split(",");
+                for (String childrenId : ids) {
+                    childrenIds.add(Integer.parseInt(childrenId.trim()));
+                }
+            } else if (body.get("childrenIds") instanceof List<?>) {
+                for (Object childrenId : (List<?>) body.get("childrenIds")) {
+                    childrenIds.add((Integer) childrenId);
+                }
+            }
+
+            StudyPlan studyPlan = session.get(StudyPlan.class, id);
+
+            if (studyPlan != null) {
+                studyPlan.setName(name);
+                studyPlan.setStartDate(startDate);
+                studyPlan.setEndDate(endDate);
+                studyPlan.setSubjectId(subjectId);
+
+                session.update(studyPlan);
+            }
+
+            // Update records into children_do_test table
+            session.createNativeQuery("delete from children_join_study_plan where study_plan_id = :studyPlanId")
+                    .setParameter("studyPlanId", id)
+                    .executeUpdate();
+
+            for (Integer childrenId : childrenIds) {
+                String sql = "insert into children_join_study_plan (study_plan_id, children_id) " +
+                        "values (:studyPlanId, :childrenId)";
+
+                session.createNativeQuery(sql)
+                        .setParameter("studyPlanId", id)
+                        .setParameter("childrenId", childrenId)
+                        .executeUpdate();
+            }
+
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) {
