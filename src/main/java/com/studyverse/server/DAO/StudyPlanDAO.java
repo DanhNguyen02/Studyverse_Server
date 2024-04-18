@@ -15,11 +15,43 @@ import java.util.*;
 public class StudyPlanDAO {
     private final SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
 
-    public Map<Integer, List<StudyPlan>> getAllStudyPlans(Integer familyId) {
-        Map<Integer, List<StudyPlan>> listMap = new HashMap<>();
+    public Map<Integer, Map<Integer, List<StudyPlan>>> getAllStudyPlans(Integer familyId) {
+        Map<Integer, Map<Integer, List<StudyPlan>>> listMap = new HashMap<>();
         Transaction transaction = null;
         try (Session session = sessionFactory.openSession()) {
             transaction = session.beginTransaction();
+
+            String getChildrenIdsSql = "select * from user where family_id = :familyId and role = 0";
+
+            List<Object[]> results = session.createNativeQuery(getChildrenIdsSql)
+                    .setParameter("familyId", familyId)
+                    .getResultList();
+
+            for (Object[] row : results) {
+                Map<Integer, List<StudyPlan>> studyPlanSubjectList = new HashMap<>();
+
+                int childrenId = (Integer) row[0];
+
+                String getStudyPlanIdListSql = "select study_plan_id from children_join_study_plan " +
+                        "where children_id = :id";
+
+                List<Object[]> studyPlanIds = session.createNativeQuery(getStudyPlanIdListSql)
+                        .setParameter("id", childrenId)
+                        .getResultList();
+
+                for (int subjectId = 1; subjectId <= 12; subjectId++) {
+                    String getStudyPlansSql = "select * from study_plan where id in (:studyPlanIds) and subject_id = :subjectId";
+
+                    List<StudyPlan> studyPlanList = session.createNativeQuery(getStudyPlansSql, StudyPlan.class)
+                            .setParameter("studyPlanIds", studyPlanIds)
+                            .setParameter("subjectId", subjectId)
+                            .getResultList();
+
+                    studyPlanSubjectList.put(subjectId, studyPlanList);
+                }
+
+                listMap.put(childrenId, studyPlanSubjectList);
+            }
 
             transaction.commit();
         } catch (Exception e) {

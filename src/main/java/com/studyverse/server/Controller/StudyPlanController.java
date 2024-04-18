@@ -16,7 +16,7 @@ public class StudyPlanController {
     private StudyPlanDAO studyPlanDAO;
 
     @GetMapping("/{familyId}")
-    public Map<Integer, List<StudyPlan>> getAllStudyPlans(@PathVariable("familyId") Integer familyId) {
+    public Map<Integer, Map<Integer, List<StudyPlan>>> getAllStudyPlans(@PathVariable("familyId") Integer familyId) {
         return studyPlanDAO.getAllStudyPlans(familyId);
     }
 
