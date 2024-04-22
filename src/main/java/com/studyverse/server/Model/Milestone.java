@@ -34,6 +34,9 @@ public class Milestone {
     @Transient
     private Test test;
 
+    @Transient
+    private int isPass;
+
     public int getId() {
         return id;
     }
@@ -88,6 +91,14 @@ public class Milestone {
 
     public void setTest(Test test) {
         this.test = test;
+    }
+
+    public int getIsPass() {
+        return isPass;
+    }
+
+    public void setIsPass(int isPass) {
+        this.isPass = isPass;
     }
 
     @Override

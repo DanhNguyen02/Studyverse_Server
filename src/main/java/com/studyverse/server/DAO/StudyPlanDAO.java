@@ -131,11 +131,11 @@ public class StudyPlanDAO {
 
                     session.save(milestone);
 
-                    Integer testId = milestoneObject.get("testId") == null ?
+                    Integer testId = milestoneObject.get("testId") == JSONObject.NULL ?
                             null : SafeConvert.safeConvertToInt(milestoneObject.get("testId"));
 
                     String sql = "insert into test_in_milestone (milestone_id, children_id, test_id) " +
-                            "values (:milestoneId. :childrenId, :testId)";
+                            "values (:milestoneId, :childrenId, :testId)";
 
                     for (Integer childrenId : childrenIds) {
                         session.createNativeQuery(sql)
