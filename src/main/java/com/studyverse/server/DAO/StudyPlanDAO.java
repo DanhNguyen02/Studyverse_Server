@@ -1,11 +1,16 @@
 package com.studyverse.server.DAO;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.studyverse.server.Model.Milestone;
 import com.studyverse.server.Model.StudyPlan;
 import com.studyverse.server.SafeConvert;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.stereotype.Repository;
 
 import java.text.SimpleDateFormat;
@@ -108,6 +113,66 @@ public class StudyPlanDAO {
                         .setParameter("studyPlanId", studyPlan.getId())
                         .setParameter("childrenId", childrenId)
                         .executeUpdate();
+            }
+
+            if (body.get("milestones") instanceof String milestonesString) {
+                JSONArray milestones = new JSONArray(milestonesString);
+
+                for (int i = 0; i < milestones.length(); i++) {
+                    JSONObject milestoneObject = milestones.getJSONObject(i);
+
+                    Milestone milestone = new Milestone();
+
+                    milestone.setName((String) milestoneObject.get("name"));
+                    milestone.setContent((String) milestoneObject.get("content"));
+                    milestone.setStartDate(sdf.parse((String) milestoneObject.get("startDate")));
+                    milestone.setEndDate(sdf.parse((String) milestoneObject.get("endDate")));
+                    milestone.setStudyPlanId(studyPlan.getId());
+
+                    session.save(milestone);
+
+                    Integer testId = milestoneObject.get("testId") == null ?
+                            null : SafeConvert.safeConvertToInt(milestoneObject.get("testId"));
+
+                    String sql = "insert into test_in_milestone (milestone_id, children_id, test_id) " +
+                            "values (:milestoneId. :childrenId, :testId)";
+
+                    for (Integer childrenId : childrenIds) {
+                        session.createNativeQuery(sql)
+                                .setParameter("milestoneId", milestone.getId())
+                                .setParameter("childrenId", childrenId)
+                                .setParameter("testId", testId)
+                                .executeUpdate();
+                    }
+                }
+            } else if (body.get("milestones") instanceof List<?>) {
+                List<Map<String, Object>> milestones = (List<Map<String, Object>>) body.get("milestones");
+
+                for (Map<String, Object> milestoneMap : milestones) {
+                    Milestone milestone = new Milestone();
+
+                    milestone.setName((String) milestoneMap.get("name"));
+                    milestone.setContent((String) milestoneMap.get("content"));
+                    milestone.setStartDate(sdf.parse((String) milestoneMap.get("startDate")));
+                    milestone.setEndDate(sdf.parse((String) milestoneMap.get("endDate")));
+                    milestone.setStudyPlanId(studyPlan.getId());
+
+                    session.save(milestone);
+
+                    Integer testId = milestoneMap.get("testId") == null ?
+                            null : SafeConvert.safeConvertToInt(milestoneMap.get("testId"));
+
+                    String sql = "insert into test_in_milestone (milestone_id, children_id, test_id) " +
+                            "values (:milestoneId, :childrenId, :testId)";
+
+                    for (Integer childrenId : childrenIds) {
+                        session.createNativeQuery(sql)
+                                .setParameter("milestoneId", milestone.getId())
+                                .setParameter("childrenId", childrenId)
+                                .setParameter("testId", testId)
+                                .executeUpdate();
+                    }
+                }
             }
 
             transaction.commit();
