@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studyverse.server.Model.Milestone;
 import com.studyverse.server.Model.StudyPlan;
+import com.studyverse.server.Model.Test;
 import com.studyverse.server.SafeConvert;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Repository;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class StudyPlanDAO {
@@ -37,20 +39,67 @@ public class StudyPlanDAO {
 
                 int childrenId = (Integer) row[0];
 
-                String getStudyPlanIdListSql = "select study_plan_id from children_join_study_plan " +
-                        "where children_id = :id";
-
-                List<Object[]> studyPlanIds = session.createNativeQuery(getStudyPlanIdListSql)
-                        .setParameter("id", childrenId)
-                        .getResultList();
-
                 for (int subjectId = 1; subjectId <= 12; subjectId++) {
-                    String getStudyPlansSql = "select * from study_plan where id in (:studyPlanIds) and subject_id = :subjectId";
+                    String getStudyPlansSql = "select sp.* " +
+                            "from children_join_study_plan csp inner join study_plan sp " +
+                            "on csp.study_plan_id = sp.id " +
+                            "where csp.children_id = :id and sp.subject_id = :subjectId";
 
-                    List<StudyPlan> studyPlanList = session.createNativeQuery(getStudyPlansSql, StudyPlan.class)
-                            .setParameter("studyPlanIds", studyPlanIds)
+                    List<Object[]> studyPlanListObject = session.createNativeQuery(getStudyPlansSql)
+                            .setParameter("id", childrenId)
                             .setParameter("subjectId", subjectId)
                             .getResultList();
+
+                    List<StudyPlan> studyPlanList = new ArrayList<>();
+
+                    for (Object[] studyPlanRow : studyPlanListObject) {
+                        StudyPlan studyPlan = new StudyPlan();
+                        studyPlan.setId((Integer) studyPlanRow[0]);
+                        studyPlan.setName((String) studyPlanRow[1]);
+                        studyPlan.setStartDate((Date) studyPlanRow[2]);
+                        studyPlan.setEndDate((Date) studyPlanRow[3]);
+                        studyPlan.setSubjectId((Integer) studyPlanRow[4]);
+
+                        String getMilestoneSql = "select * from " +
+                                "milestone m inner join test_in_milestone tim " +
+                                "on m.id = tim.milestone_id " +
+                                "where m.study_plan_id = :studyPlanId and tim.children_id = :childrenId";
+
+                        List<Object[]> milestoneList = session.createNativeQuery(getMilestoneSql)
+                                .setParameter("studyPlanId", studyPlan.getId())
+                                .setParameter("childrenId", childrenId)
+                                .getResultList();
+
+                        List<Milestone> milestones = new ArrayList<>();
+
+                        for (Object[] milestoneRow : milestoneList) {
+                            Milestone milestone = new Milestone();
+                            milestone.setId((Integer) milestoneRow[0]);
+                            milestone.setName((String) milestoneRow[1]);
+                            milestone.setContent((String) milestoneRow[2]);
+                            milestone.setStartDate((Date) milestoneRow[3]);
+                            milestone.setEndDate((Date) milestoneRow[4]);
+                            milestone.setPass((Integer) milestoneRow[9] == 1);
+
+                            Integer testId = (Integer) milestoneRow[8];
+                            if (testId != null && testId > 0) {
+                                Test test = session.get(Test.class, testId);
+                                milestone.setTest(test);
+                            }
+
+                            milestones.add(milestone);
+                        }
+
+                        if (!listMap.isEmpty()) System.out.println(listMap.get(4).get(1).get(0).getMilestones().get(0));
+
+                        System.out.println(studyPlan.getMilestones());
+                        studyPlan.setMilestones(milestones);
+                        System.out.println(studyPlan.getMilestones());
+
+                        if (!listMap.isEmpty()) System.out.println(listMap.get(4).get(1).get(0).getMilestones().get(0));
+
+                        studyPlanList.add(studyPlan);
+                    }
 
                     studyPlanSubjectList.put(subjectId, studyPlanList);
                 }

@@ -35,7 +35,7 @@ public class Milestone {
     private Test test;
 
     @Transient
-    private int isPass;
+    private boolean isPass;
 
     public int getId() {
         return id;
@@ -93,12 +93,12 @@ public class Milestone {
         this.test = test;
     }
 
-    public int getIsPass() {
+    public boolean isPass() {
         return isPass;
     }
 
-    public void setIsPass(int isPass) {
-        this.isPass = isPass;
+    public void setPass(boolean pass) {
+        isPass = pass;
     }
 
     @Override
@@ -109,7 +109,9 @@ public class Milestone {
                 ", content='" + content + '\'' +
                 ", startDate=" + startDate +
                 ", endDate=" + endDate +
+                ", studyPlanId=" + studyPlanId +
                 ", test=" + test +
+                ", isPass=" + isPass +
                 '}';
     }
 }

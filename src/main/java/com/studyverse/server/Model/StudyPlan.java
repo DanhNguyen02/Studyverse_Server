@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "study_plan")
@@ -27,6 +28,9 @@ public class StudyPlan {
     @Column(name = "subject_id")
     @JsonIgnore
     private int subjectId;
+
+    @Transient
+    private List<Milestone> milestones;
 
     public int getId() {
         return id;
@@ -66,5 +70,13 @@ public class StudyPlan {
 
     public void setSubjectId(int subjectId) {
         this.subjectId = subjectId;
+    }
+
+    public List<Milestone> getMilestones() {
+        return milestones;
+    }
+
+    public void setMilestones(List<Milestone> milestones) {
+        this.milestones = milestones;
     }
 }
