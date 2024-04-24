@@ -396,6 +396,7 @@ public class TestDAO {
 
     public boolean submitTest(Map<String, Object> body) {
         Transaction transaction = null;
+        Submission submission;
         try (Session session = sessionFactory.openSession()) {
             transaction = session.beginTransaction();
 
@@ -412,7 +413,7 @@ public class TestDAO {
             int testId = SafeConvert.safeConvertToInt(body.get("testId"));
             int childrenId = SafeConvert.safeConvertToInt(body.get("childrenId"));
 
-            Submission submission = new Submission();
+            submission = new Submission();
 
             submission.setStartDate(startDate);
             submission.setEndDate(endDate);
@@ -486,6 +487,8 @@ public class TestDAO {
                     }
                 }
             }
+
+            gradeTest(testId, childrenId, session);
 
             transaction.commit();
         } catch (Exception e) {
@@ -586,16 +589,6 @@ public class TestDAO {
                         .executeUpdate();
             }
 
-            // Update questions
-//            if (body.get("questions") instanceof String questionsString) {
-//                updateQuestionsString(questionsString, session, id);
-//            } else if (body.get("questions") instanceof List<?>) {
-//                for (Object questionObj : (List<?>) body.get("questions")) {
-//                    Map<String, Object> questionMap = (Map<String, Object>) questionObj;
-//                    updateQuestionMap(questionMap, session, id);
-//                }
-//            }
-
             transaction.commit();
 
             return true;
@@ -607,47 +600,6 @@ public class TestDAO {
             return false;
         }
     }
-
-//    public void updateQuestionsString(String questionString, Session session, Integer testId) {
-//        Transaction transaction = session.getTransaction();
-//
-//        try {
-//
-//        } catch (Exception e) {
-//            if (transaction != null) {
-//                transaction.rollback();
-//            }
-//            e.printStackTrace();
-//        }
-//    }
-
-//    public void updateQuestionMap(Map<String, Object> questionMap, Session session, Integer testId) {
-//        Transaction transaction = session.getTransaction();
-//
-//        try {
-//            Integer questionId = SafeConvert.safeConvertToInt(questionMap.get("id"));
-//
-//            Question question = session.createQuery("FROM Question WHERE id = :id", Question.class)
-//                    .setParameter("id", questionId)
-//                    .uniqueResult();
-//
-//            String name = (String) questionMap.get("name");
-//            String suggest = (String) questionMap.get("suggest");
-//            byte[] image = null;
-//            String questionImageDataBase64 = (String) questionMap.get("image");
-//            if (questionImageDataBase64 != null && !questionImageDataBase64.isEmpty()) {
-//                image = Base64.getDecoder().decode(questionImageDataBase64);
-//            }
-//            else image = new byte[0];
-//            Choice correctChoice = (Choice) questionMap.get("correctChoice");
-//
-//        } catch (Exception e) {
-//            if (transaction != null) {
-//                transaction.rollback();
-//            }
-//            e.printStackTrace();
-//        }
-//    }
 
     public boolean deleteTest(Integer id) {
         Transaction transaction = null;
@@ -669,6 +621,70 @@ public class TestDAO {
             }
             e.printStackTrace();
             return false;
+        }
+    }
+
+    public void gradeTest(Integer testId, Integer childrenId, Session session) {
+        Transaction transaction = session.getTransaction();
+        try {
+            List<Submission> submissions = session.createQuery("FROM Submission WHERE childrenId = :childrenId",
+                            Submission.class)
+                    .setParameter("childrenId", childrenId)
+                    .getResultList();
+
+            System.out.println(submissions);
+
+            List<Question> questions = session.createQuery("FROM Question WHERE testId = :testId", Question.class)
+                            .setParameter("testId", testId)
+                            .getResultList();
+
+            Map<Integer, Question> questionMap = questions.stream()
+                    .collect(Collectors.toMap(Question::getId, question -> question));
+
+            for (Submission submission : submissions) {
+                List<Object[]> choiceObjects = session.createNativeQuery("select * from choice_in_submission " +
+                                "where submission_id = :submissionId")
+                        .setParameter("submissionId", submission.getId())
+                        .getResultList();
+
+                List<Object[]> essayAnswerObjects = session.createNativeQuery("select * from answer_in_submission " +
+                                "where submission_id = :submissionId")
+                        .setParameter("submissionId", submission.getId())
+                        .getResultList();
+
+                int count = 0;
+
+                for (Object[] choiceObject : choiceObjects) {
+                    Integer questionId = (Integer) choiceObject[1];
+                    Integer choiceId = (Integer) choiceObject[2];
+
+                    Integer answerId = questionMap.get(questionId).getAnswerId();
+
+                    if (Objects.equals(choiceId, answerId)) count++;
+                }
+
+                for (Object[] essayAnswerObject : essayAnswerObjects) {
+                    if ((Integer) essayAnswerObject[3] == 1) count++;
+                }
+
+                Test test = session.get(Test.class, submission.getTestId());
+
+                if (count >= test.getQuestionCountToPass()) {
+                    String sql = "update test_in_milestone set is_pass = 1 " +
+                            "where children_id = :childrenId and test_id = :testId";
+
+                    session.createNativeQuery(sql)
+                            .setParameter("childrenId", childrenId)
+                            .setParameter("testId", testId)
+                            .executeUpdate();
+                }
+            }
+
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
         }
     }
 }

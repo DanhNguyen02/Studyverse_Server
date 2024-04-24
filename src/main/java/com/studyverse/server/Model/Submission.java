@@ -88,4 +88,17 @@ public class Submission {
     public void setAnswers(Map<Integer, Object> answers) {
         this.answers = answers;
     }
+
+    @Override
+    public String toString() {
+        return "Submission{" +
+                "id=" + id +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", time=" + time +
+                ", testId=" + testId +
+                ", childrenId=" + childrenId +
+                ", answers=" + answers +
+                '}';
+    }
 }

@@ -1,7 +1,5 @@
 package com.studyverse.server.DAO;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.studyverse.server.Model.Milestone;
 import com.studyverse.server.Model.StudyPlan;
 import com.studyverse.server.Model.Test;
@@ -16,7 +14,6 @@ import org.springframework.stereotype.Repository;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Repository
 public class StudyPlanDAO {
@@ -278,10 +275,10 @@ public class StudyPlanDAO {
                     .setParameter("studyPlanId", id)
                     .executeUpdate();
 
-            for (Integer childrenId : childrenIds) {
-                String sql = "insert into children_join_study_plan (study_plan_id, children_id) " +
-                        "values (:studyPlanId, :childrenId)";
+            String sql = "insert into children_join_study_plan (study_plan_id, children_id) " +
+                    "values (:studyPlanId, :childrenId)";
 
+            for (Integer childrenId : childrenIds) {
                 session.createNativeQuery(sql)
                         .setParameter("studyPlanId", id)
                         .setParameter("childrenId", childrenId)
