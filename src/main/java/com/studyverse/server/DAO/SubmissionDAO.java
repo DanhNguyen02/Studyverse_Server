@@ -1,5 +1,6 @@
 package com.studyverse.server.DAO;
 
+import com.studyverse.server.Model.Submission;
 import com.studyverse.server.SafeConvert;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -63,6 +64,10 @@ public class SubmissionDAO {
                     if (rowsAffected == 0) return false;
                 }
             }
+
+            TestDAO testDAO = new TestDAO();
+            Submission submission = session.get(Submission.class, submissionId);
+            testDAO.gradeTest(submission.getTestId(), submission.getChildrenId(), session);
 
             transaction.commit();
 

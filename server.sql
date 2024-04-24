@@ -11,7 +11,7 @@
  Target Server Version : 50742
  File Encoding         : 65001
 
- Date: 05/04/2024 20:42:41
+ Date: 24/04/2024 11:24:34
 */
 
 SET NAMES utf8mb4;
@@ -54,13 +54,30 @@ CREATE TABLE `children_do_test`  (
 -- ----------------------------
 
 -- ----------------------------
+-- Table structure for children_join_study_plan
+-- ----------------------------
+DROP TABLE IF EXISTS `children_join_study_plan`;
+CREATE TABLE `children_join_study_plan`  (
+  `study_plan_id` int(11) NOT NULL,
+  `children_id` int(11) NOT NULL,
+  PRIMARY KEY (`study_plan_id`, `children_id`) USING BTREE,
+  INDEX `children_id`(`children_id`) USING BTREE,
+  CONSTRAINT `children_join_study_plan_ibfk_2` FOREIGN KEY (`children_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `children_join_study_plan_ibfk_3` FOREIGN KEY (`study_plan_id`) REFERENCES `study_plan` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of children_join_study_plan
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for choice
 -- ----------------------------
 DROP TABLE IF EXISTS `choice`;
 CREATE TABLE `choice`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `content` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
-  `image` blob NULL,
+  `image` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `question_id` int(11) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `question_id`(`question_id`) USING BTREE,
@@ -191,15 +208,34 @@ INSERT INTO `message` VALUES (6, 'T1 thua rồi', b'0', 3, 1, '2024-03-13 16:05:
 INSERT INTO `message` VALUES (7, 'Buồn k ông cháu ơi', b'0', 3, 1, '2024-03-13 16:05:36');
 
 -- ----------------------------
+-- Table structure for milestone
+-- ----------------------------
+DROP TABLE IF EXISTS `milestone`;
+CREATE TABLE `milestone`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `content` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `start_date` date NULL DEFAULT NULL,
+  `end_date` date NULL DEFAULT NULL,
+  `study_plan_id` int(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `study_plan_id`(`study_plan_id`) USING BTREE,
+  CONSTRAINT `milestone_ibfk_1` FOREIGN KEY (`study_plan_id`) REFERENCES `study_plan` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of milestone
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for question
 -- ----------------------------
 DROP TABLE IF EXISTS `question`;
 CREATE TABLE `question`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
-  `description` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `suggest` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
-  `image` blob NULL,
+  `image` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
   `answer_id` int(11) NULL DEFAULT NULL,
   `type` int(11) NULL DEFAULT NULL,
   `test_id` int(11) NULL DEFAULT NULL,
@@ -244,6 +280,25 @@ CREATE TABLE `remind_event`  (
 
 -- ----------------------------
 -- Records of remind_event
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for study_plan
+-- ----------------------------
+DROP TABLE IF EXISTS `study_plan`;
+CREATE TABLE `study_plan`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL,
+  `start_date` date NULL DEFAULT NULL,
+  `end_date` date NULL DEFAULT NULL,
+  `subject_id` int(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `subject_id`(`subject_id`) USING BTREE,
+  CONSTRAINT `study_plan_ibfk_1` FOREIGN KEY (`subject_id`) REFERENCES `tag` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of study_plan
 -- ----------------------------
 
 -- ----------------------------
@@ -333,6 +388,27 @@ CREATE TABLE `test_have_tag`  (
 
 -- ----------------------------
 -- Records of test_have_tag
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for test_in_milestone
+-- ----------------------------
+DROP TABLE IF EXISTS `test_in_milestone`;
+CREATE TABLE `test_in_milestone`  (
+  `milestone_id` int(11) NULL DEFAULT NULL,
+  `children_id` int(11) NULL DEFAULT NULL,
+  `test_id` int(11) NULL DEFAULT NULL,
+  `is_pass` int(11) NULL DEFAULT 0,
+  INDEX `milestone_id`(`milestone_id`) USING BTREE,
+  INDEX `children_id`(`children_id`) USING BTREE,
+  INDEX `test_id`(`test_id`) USING BTREE,
+  CONSTRAINT `test_in_milestone_ibfk_1` FOREIGN KEY (`milestone_id`) REFERENCES `milestone` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `test_in_milestone_ibfk_2` FOREIGN KEY (`children_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `test_in_milestone_ibfk_3` FOREIGN KEY (`test_id`) REFERENCES `test` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE = InnoDB CHARACTER SET = latin1 COLLATE = latin1_swedish_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of test_in_milestone
 -- ----------------------------
 
 -- ----------------------------
