@@ -19,5 +19,7 @@
         <mapping class="com.studyverse.server.Model.Question"/>
         <mapping class="com.studyverse.server.Model.Test"/>
         <mapping class="com.studyverse.server.Model.Submission"/>
+        <mapping class="com.studyverse.server.Model.StudyPlan"/>
+        <mapping class="com.studyverse.server.Model.Milestone"/>
     </session-factory>
 </hibernate-configuration>
