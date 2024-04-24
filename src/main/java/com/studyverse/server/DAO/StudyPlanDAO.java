@@ -69,6 +69,8 @@ public class StudyPlanDAO {
 
                         List<Milestone> milestones = new ArrayList<>();
 
+                        boolean flag = true;
+
                         for (Object[] milestoneRow : milestoneList) {
                             Milestone milestone = new Milestone();
                             milestone.setId((Integer) milestoneRow[0]);
@@ -76,7 +78,11 @@ public class StudyPlanDAO {
                             milestone.setContent((String) milestoneRow[2]);
                             milestone.setStartDate((Date) milestoneRow[3]);
                             milestone.setEndDate((Date) milestoneRow[4]);
-                            milestone.setPass((Integer) milestoneRow[9] == 1);
+                            if (!flag) milestone.setPass(false);
+                            else {
+                                flag = (Integer) milestoneRow[9] == 1;
+                                milestone.setPass(flag);
+                            }
 
                             Integer testId = (Integer) milestoneRow[8];
                             if (testId != null && testId > 0) {
