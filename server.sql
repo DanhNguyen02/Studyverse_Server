@@ -11,7 +11,7 @@
  Target Server Version : 50742
  File Encoding         : 65001
 
- Date: 24/04/2024 11:24:34
+ Date: 24/04/2024 19:32:42
 */
 
 SET NAMES utf8mb4;
@@ -395,11 +395,11 @@ CREATE TABLE `test_have_tag`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `test_in_milestone`;
 CREATE TABLE `test_in_milestone`  (
-  `milestone_id` int(11) NULL DEFAULT NULL,
-  `children_id` int(11) NULL DEFAULT NULL,
+  `milestone_id` int(11) NOT NULL,
+  `children_id` int(11) NOT NULL,
   `test_id` int(11) NULL DEFAULT NULL,
   `is_pass` int(11) NULL DEFAULT 0,
-  INDEX `milestone_id`(`milestone_id`) USING BTREE,
+  PRIMARY KEY (`milestone_id`, `children_id`) USING BTREE,
   INDEX `children_id`(`children_id`) USING BTREE,
   INDEX `test_id`(`test_id`) USING BTREE,
   CONSTRAINT `test_in_milestone_ibfk_1` FOREIGN KEY (`milestone_id`) REFERENCES `milestone` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
