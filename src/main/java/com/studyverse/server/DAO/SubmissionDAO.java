@@ -19,8 +19,10 @@ public class SubmissionDAO {
     private final SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
 
     public boolean scoringTest(HashMap<String, Object> body) {
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             int submissionId = SafeConvert.safeConvertToInt(body.get("id"));

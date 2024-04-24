@@ -21,8 +21,10 @@ public class StudyPlanDAO {
 
     public Map<Integer, Map<Integer, List<StudyPlan>>> getAllStudyPlans(Integer familyId) {
         Map<Integer, Map<Integer, List<StudyPlan>>> listMap = new HashMap<>();
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String getChildrenIdsSql = "select * from user where family_id = :familyId and role = 0";
@@ -122,8 +124,10 @@ public class StudyPlanDAO {
     }
 
     public boolean createStudyPlan(HashMap<String, Object> body) {
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String name = (String) body.get("name");
@@ -239,8 +243,10 @@ public class StudyPlanDAO {
     }
 
     public boolean updateStudyPlan(Integer id, HashMap<String, Object> body) {
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String name = (String) body.get("name");
@@ -303,8 +309,10 @@ public class StudyPlanDAO {
     }
 
     public boolean deleteStudyPlan(Integer id) {
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String hql = "DELETE FROM StudyPlan WHERE id = :id";

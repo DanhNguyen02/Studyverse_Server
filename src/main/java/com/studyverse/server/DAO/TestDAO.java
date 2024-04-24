@@ -26,8 +26,10 @@ public class TestDAO {
     private final SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
 
     public boolean createTest(Map<String, Object> body) {
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String name = (String) body.get("name");
@@ -239,8 +241,10 @@ public class TestDAO {
 
     public Map<Integer, List<Test>> getAllTests(Integer familyId) {
         Map<Integer, List<Test>> listMap = new HashMap<>();
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String getChildrenIdSql = "select * from user where family_id = :familyId and role = 0";
@@ -395,9 +399,10 @@ public class TestDAO {
     }
 
     public boolean submitTest(Map<String, Object> body) {
+        Session session;
         Transaction transaction = null;
-        Submission submission;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String startDateString = (String) body.get("startDate");
@@ -413,7 +418,7 @@ public class TestDAO {
             int testId = SafeConvert.safeConvertToInt(body.get("testId"));
             int childrenId = SafeConvert.safeConvertToInt(body.get("childrenId"));
 
-            submission = new Submission();
+            Submission submission = new Submission();
 
             submission.setStartDate(startDate);
             submission.setEndDate(endDate);
@@ -503,8 +508,10 @@ public class TestDAO {
     }
 
     public boolean updateTest(Integer id, Map<String, Object> body) {
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String name = (String) body.get("name");
@@ -602,8 +609,10 @@ public class TestDAO {
     }
 
     public boolean deleteTest(Integer id) {
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String hql = "DELETE FROM Test WHERE id = :id";
