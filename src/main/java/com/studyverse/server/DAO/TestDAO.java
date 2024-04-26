@@ -636,16 +636,19 @@ public class TestDAO {
     public void gradeTest(Integer testId, Integer childrenId, Session session) {
         Transaction transaction = session.getTransaction();
         try {
-            List<Submission> submissions = session.createQuery("FROM Submission WHERE childrenId = :childrenId",
-                            Submission.class)
+            List<Submission> submissions = session.createQuery("FROM Submission WHERE childrenId = :childrenId " +
+                                    "AND testId = :testId", Submission.class)
                     .setParameter("childrenId", childrenId)
+                    .setParameter("testId", testId)
                     .getResultList();
 
-            System.out.println(submissions);
+//            System.out.println(submissions);
 
             List<Question> questions = session.createQuery("FROM Question WHERE testId = :testId", Question.class)
                             .setParameter("testId", testId)
                             .getResultList();
+
+//            System.out.println(questions);
 
             Map<Integer, Question> questionMap = questions.stream()
                     .collect(Collectors.toMap(Question::getId, question -> question));
