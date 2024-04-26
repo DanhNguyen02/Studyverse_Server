@@ -662,6 +662,7 @@ public class TestDAO {
                         .getResultList();
 
                 int count = 0;
+                boolean canGrade = true;
 
                 for (Object[] choiceObject : choiceObjects) {
                     Integer questionId = (Integer) choiceObject[1];
@@ -674,11 +675,12 @@ public class TestDAO {
 
                 for (Object[] essayAnswerObject : essayAnswerObjects) {
                     if ((Integer) essayAnswerObject[3] == 1) count++;
+                    else if ((Integer) essayAnswerObject[3] == 0) canGrade = false;
                 }
 
                 Test test = session.get(Test.class, submission.getTestId());
 
-                if (count >= test.getQuestionCountToPass()) {
+                if (canGrade && count >= test.getQuestionCountToPass()) {
                     String sql = "update test_in_milestone set is_pass = 1 " +
                             "where children_id = :childrenId and test_id = :testId";
 
