@@ -95,13 +95,7 @@ public class StudyPlanDAO {
                             milestones.add(milestone);
                         }
 
-                        if (!listMap.isEmpty()) System.out.println(listMap.get(4).get(1).get(0).getMilestones().get(0));
-
-                        System.out.println(studyPlan.getMilestones());
                         studyPlan.setMilestones(milestones);
-                        System.out.println(studyPlan.getMilestones());
-
-                        if (!listMap.isEmpty()) System.out.println(listMap.get(4).get(1).get(0).getMilestones().get(0));
 
                         studyPlanList.add(studyPlan);
                     }
