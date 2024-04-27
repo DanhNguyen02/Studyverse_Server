@@ -19,8 +19,10 @@ public class MilestoneDAO {
     private final SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
 
     public boolean addMilestone(HashMap<String, Object> body) {
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String name = (String) body.get("name");
@@ -77,8 +79,10 @@ public class MilestoneDAO {
     }
 
     public boolean updateMilestone(Integer id, HashMap<String, Object> body) {
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String name = (String) body.get("name");
@@ -118,14 +122,43 @@ public class MilestoneDAO {
     }
 
     public boolean deleteMilestone(Integer id) {
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String hql = "DELETE FROM Milestone WHERE id = :id";
 
             int rowsAffected = session.createQuery(hql)
                     .setParameter("id", id)
+                    .executeUpdate();
+
+            transaction.commit();
+
+            return rowsAffected != 0;
+        } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean completeMilestone(Integer milestoneId, Integer childrenId) {
+        Session session;
+        Transaction transaction = null;
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+
+            String sql = "update test_in_milestone set is_pass = 1 where milestone_id = :milestoneId and " +
+                    "children_id = :childrenId";
+
+            int rowsAffected = session.createNativeQuery(sql)
+                    .setParameter("milestoneId", milestoneId)
+                    .setParameter("childrenId", childrenId)
                     .executeUpdate();
 
             transaction.commit();
