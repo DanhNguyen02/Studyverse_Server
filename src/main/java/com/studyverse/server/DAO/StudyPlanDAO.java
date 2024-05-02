@@ -21,8 +21,10 @@ public class StudyPlanDAO {
 
     public Map<Integer, Map<Integer, List<StudyPlan>>> getAllStudyPlans(Integer familyId) {
         Map<Integer, Map<Integer, List<StudyPlan>>> listMap = new HashMap<>();
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String getChildrenIdsSql = "select * from user where family_id = :familyId and role = 0";
@@ -69,6 +71,8 @@ public class StudyPlanDAO {
 
                         List<Milestone> milestones = new ArrayList<>();
 
+                        boolean flag = true;
+
                         for (Object[] milestoneRow : milestoneList) {
                             Milestone milestone = new Milestone();
                             milestone.setId((Integer) milestoneRow[0]);
@@ -76,7 +80,11 @@ public class StudyPlanDAO {
                             milestone.setContent((String) milestoneRow[2]);
                             milestone.setStartDate((Date) milestoneRow[3]);
                             milestone.setEndDate((Date) milestoneRow[4]);
-                            milestone.setPass((Integer) milestoneRow[9] == 1);
+                            if (!flag) milestone.setPass(false);
+                            else {
+                                flag = (Integer) milestoneRow[9] == 1;
+                                milestone.setPass(flag);
+                            }
 
                             Integer testId = (Integer) milestoneRow[8];
                             if (testId != null && testId > 0) {
@@ -87,13 +95,7 @@ public class StudyPlanDAO {
                             milestones.add(milestone);
                         }
 
-                        if (!listMap.isEmpty()) System.out.println(listMap.get(4).get(1).get(0).getMilestones().get(0));
-
-                        System.out.println(studyPlan.getMilestones());
                         studyPlan.setMilestones(milestones);
-                        System.out.println(studyPlan.getMilestones());
-
-                        if (!listMap.isEmpty()) System.out.println(listMap.get(4).get(1).get(0).getMilestones().get(0));
 
                         studyPlanList.add(studyPlan);
                     }
@@ -116,8 +118,10 @@ public class StudyPlanDAO {
     }
 
     public boolean createStudyPlan(HashMap<String, Object> body) {
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String name = (String) body.get("name");
@@ -233,8 +237,10 @@ public class StudyPlanDAO {
     }
 
     public boolean updateStudyPlan(Integer id, HashMap<String, Object> body) {
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String name = (String) body.get("name");
@@ -297,8 +303,10 @@ public class StudyPlanDAO {
     }
 
     public boolean deleteStudyPlan(Integer id) {
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String hql = "DELETE FROM StudyPlan WHERE id = :id";

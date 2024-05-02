@@ -178,6 +178,7 @@ public class FamilyDAO {
                     rs.getString("user_status"),
                     rs.getBoolean("account_status"),
                     rs.getDate("dob"),
+                    rs.getInt("family_id"),
                     rs.getString("email").equals(family.getEmail())
                 );
                 Timestamp lastLogin = rs.getTimestamp("last_login");

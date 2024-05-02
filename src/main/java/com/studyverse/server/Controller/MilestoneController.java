@@ -39,4 +39,16 @@ public class MilestoneController {
 
         return response;
     }
+
+    @PostMapping("/complete")
+    public Map<String, String> deleteMilestone(@RequestBody HashMap<String, Object> body) {
+        Map<String, String> response = new HashMap<>();
+
+        Integer id = (Integer) body.get("id");
+        Integer childrenId = (Integer) body.get("childrenId");
+
+        response.put("msg", milestoneDAO.completeMilestone(id, childrenId) ? "1" : "0");
+
+        return response;
+    }
 }

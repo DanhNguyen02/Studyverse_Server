@@ -1,11 +1,15 @@
 package com.studyverse.server.Model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDateTime;
 import java.util.Date;
 
 public class User {
     private int id;
     private String email;
+
+    @JsonIgnore
     private String password;
     private String firstName;
     private String lastName;
@@ -38,7 +42,7 @@ public class User {
         this.dob = dob;
     }
 
-    public User(int id, String email, String firstName, String lastName, String phone, String avatar, String nickName, String role, String userStatus, boolean accountStatus, Date dob, Boolean isFamilyHost) {
+    public User(int id, String email, String firstName, String lastName, String phone, String avatar, String nickName, String role, String userStatus, boolean accountStatus, Date dob, Integer familyId, Boolean isFamilyHost) {
         this.id = id;
         this.email = email;
         this.firstName = firstName;
@@ -50,6 +54,7 @@ public class User {
         this.userStatus = userStatus;
         this.accountStatus = accountStatus;
         this.dob = dob;
+        this.familyId = familyId;
         this.isFamilyHost = isFamilyHost;
     }
 

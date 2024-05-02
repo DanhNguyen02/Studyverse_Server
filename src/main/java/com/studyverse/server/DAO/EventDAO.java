@@ -3,6 +3,7 @@ package com.studyverse.server.DAO;
 import com.studyverse.server.Model.Event;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
@@ -20,9 +21,11 @@ public class EventDAO {
 
     public List<Event> getEvents() {
         List<Event> events = Collections.emptyList();
-
-        try (Session session = sessionFactory.openSession()) {
-            session.beginTransaction();
+        Session session;
+        Transaction transaction = null;
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
 
             String sql = "select e.id, e.name, e.time_start, e.time_end, e.note, e.user_id, " +
                     "COALESCE(re.time, 0) as time, " +
@@ -31,8 +34,11 @@ public class EventDAO {
             NativeQuery<Event> query = session.createNativeQuery(sql, Event.class);
             events = query.list();
 
-            session.getTransaction().commit();
+            transaction.commit();
         } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             e.printStackTrace();
         }
         return events;
@@ -40,8 +46,11 @@ public class EventDAO {
 
     public List<Event> getEventsUserJoin(Integer userId) {
         List<Event> events = new ArrayList<>();
-        try (Session session = sessionFactory.openSession()) {
-            session.beginTransaction();
+        Session session;
+        Transaction transaction = null;
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
 
             String sql = "SELECT e.id, e.name, e.time_start, e.time_end, e.note, e.user_id, " +
                     "COALESCE(re.time, 0) as time, " +
@@ -93,8 +102,11 @@ public class EventDAO {
 
             events = new ArrayList<>(eventMap.values());
 
-            session.getTransaction().commit();
+            transaction.commit();
         } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             e.printStackTrace();
             return events;
         }
@@ -102,8 +114,11 @@ public class EventDAO {
     }
 
     public boolean createEvent(HashMap<String, String> body) {
-        try (Session session = sessionFactory.openSession()) {
-            session.beginTransaction();
+        Session session;
+        Transaction transaction = null;
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
 
             String name = body.get("name");
             String day = body.get("day");
@@ -232,8 +247,11 @@ public class EventDAO {
                         .executeUpdate();
             }
 
-            session.getTransaction().commit();
+            transaction.commit();
         } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             e.printStackTrace();
             return false;
         }
@@ -241,8 +259,11 @@ public class EventDAO {
     }
 
     public boolean updateEvents(Integer id, HashMap<String, String> body) {
-        try (Session session = sessionFactory.openSession()) {
-            session.beginTransaction();
+        Session session;
+        Transaction transaction = null;
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
 
             String getEventSql = "SELECT e.id, e.name, e.time_start, e.time_end, e.note, e.user_id, " +
                     "COALESCE(re.time, 0) as time, " +
@@ -421,8 +442,11 @@ public class EventDAO {
             }
             else return false;
 
-            session.getTransaction().commit();
+            transaction.commit();
         } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             e.printStackTrace();
             return false;
         }
@@ -430,8 +454,11 @@ public class EventDAO {
     }
 
     public boolean deleteEvent(Integer id, Boolean deleteLoop) {
-        try (Session session = sessionFactory.openSession()) {
-            session.beginTransaction();
+        Session session;
+        Transaction transaction = null;
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
 
             String getRangeSql = "select * from loop_event where :id BETWEEN first_event_id and last_event_id";
             List<Object[]> resultList = session.createNativeQuery(getRangeSql)
@@ -486,8 +513,11 @@ public class EventDAO {
                 }
             }
 
-            session.getTransaction().commit();
+            transaction.commit();
         } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             e.printStackTrace();
             return false;
         }
@@ -495,8 +525,11 @@ public class EventDAO {
     }
 
     public boolean updateStatus(Integer id) {
-        try (Session session = sessionFactory.openSession()) {
-            session.beginTransaction();
+        Session session;
+        Transaction transaction = null;
+        try {
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
 
             Event event = session.get(Event.class, id);
             if (event != null) {
@@ -507,8 +540,11 @@ public class EventDAO {
             }
             else return false;
 
-            session.getTransaction().commit();
+            transaction.commit();
         } catch (Exception e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             e.printStackTrace();
             return false;
         }

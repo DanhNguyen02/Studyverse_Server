@@ -26,8 +26,10 @@ public class TestDAO {
     private final SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
 
     public boolean createTest(Map<String, Object> body) {
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String name = (String) body.get("name");
@@ -239,8 +241,10 @@ public class TestDAO {
 
     public Map<Integer, List<Test>> getAllTests(Integer familyId) {
         Map<Integer, List<Test>> listMap = new HashMap<>();
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String getChildrenIdSql = "select * from user where family_id = :familyId and role = 0";
@@ -395,9 +399,10 @@ public class TestDAO {
     }
 
     public boolean submitTest(Map<String, Object> body) {
+        Session session;
         Transaction transaction = null;
-        Submission submission;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String startDateString = (String) body.get("startDate");
@@ -413,7 +418,7 @@ public class TestDAO {
             int testId = SafeConvert.safeConvertToInt(body.get("testId"));
             int childrenId = SafeConvert.safeConvertToInt(body.get("childrenId"));
 
-            submission = new Submission();
+            Submission submission = new Submission();
 
             submission.setStartDate(startDate);
             submission.setEndDate(endDate);
@@ -503,8 +508,10 @@ public class TestDAO {
     }
 
     public boolean updateTest(Integer id, Map<String, Object> body) {
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String name = (String) body.get("name");
@@ -602,8 +609,10 @@ public class TestDAO {
     }
 
     public boolean deleteTest(Integer id) {
+        Session session;
         Transaction transaction = null;
-        try (Session session = sessionFactory.openSession()) {
+        try {
+            session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
             String hql = "DELETE FROM Test WHERE id = :id";
@@ -627,16 +636,19 @@ public class TestDAO {
     public void gradeTest(Integer testId, Integer childrenId, Session session) {
         Transaction transaction = session.getTransaction();
         try {
-            List<Submission> submissions = session.createQuery("FROM Submission WHERE childrenId = :childrenId",
-                            Submission.class)
+            List<Submission> submissions = session.createQuery("FROM Submission WHERE childrenId = :childrenId " +
+                                    "AND testId = :testId", Submission.class)
                     .setParameter("childrenId", childrenId)
+                    .setParameter("testId", testId)
                     .getResultList();
 
-            System.out.println(submissions);
+//            System.out.println(submissions);
 
             List<Question> questions = session.createQuery("FROM Question WHERE testId = :testId", Question.class)
                             .setParameter("testId", testId)
                             .getResultList();
+
+//            System.out.println(questions);
 
             Map<Integer, Question> questionMap = questions.stream()
                     .collect(Collectors.toMap(Question::getId, question -> question));
@@ -653,6 +665,7 @@ public class TestDAO {
                         .getResultList();
 
                 int count = 0;
+                boolean canGrade = true;
 
                 for (Object[] choiceObject : choiceObjects) {
                     Integer questionId = (Integer) choiceObject[1];
@@ -665,11 +678,12 @@ public class TestDAO {
 
                 for (Object[] essayAnswerObject : essayAnswerObjects) {
                     if ((Integer) essayAnswerObject[3] == 1) count++;
+                    else if ((Integer) essayAnswerObject[3] == 0) canGrade = false;
                 }
 
                 Test test = session.get(Test.class, submission.getTestId());
 
-                if (count >= test.getQuestionCountToPass()) {
+                if (canGrade && count >= test.getQuestionCountToPass()) {
                     String sql = "update test_in_milestone set is_pass = 1 " +
                             "where children_id = :childrenId and test_id = :testId";
 
