@@ -21,7 +21,7 @@ public class StatisticController {
         Map<String, Object> response = new HashMap<>();
 
         response.put("test", statisticDAO.getTestStatistic(id));
-        response.put("question", statisticDAO.getQuestionStatistic(id));
+        response.put("answer", statisticDAO.getAnswerStatistic(id));
         response.put("subject", statisticDAO.getSubjectStatistic(id));
 
         return response;
