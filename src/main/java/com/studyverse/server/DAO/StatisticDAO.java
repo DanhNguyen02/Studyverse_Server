@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 public class StatisticDAO {
     private final SessionFactory sessionFactory = new Configuration().configure().buildSessionFactory();
 
-    public Map<String, Object> getTestStatistic(Integer id) {
-        Map<String, Object> listMap = new HashMap<>();
+    public Map<String, Map<String, Object>> getStatistics(Integer id) {
+        Map<String, Map<String, Object>> listMap = new HashMap<>();
         Session session;
         Transaction transaction = null;
 
@@ -25,14 +25,22 @@ public class StatisticDAO {
             session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
-            List<Integer> testIdObjects = session.createNativeQuery("select test_id from children_do_test " +
-                    "where children_id = :childrenId")
+            Map<String, Object> testStatistics = new HashMap<>();
+            Map<String, Object> answerStatistics = new HashMap<>();
+            Map<String, Object> allSubjectStatistics = new HashMap<>();
+
+            // Test and answer statistics
+
+            List<Integer> testIds = session.createNativeQuery("select test_id from children_do_test " +
+                            "where children_id = :childrenId")
                     .setParameter("childrenId", id)
                     .getResultList();
 
             Integer testCount = 0, testPass = 0;
+            Integer answerCount = 0, answerCorrect = 0;
 
-            for (Integer testId : testIdObjects) {
+            for (Integer testId : testIds) {
+                boolean isPass = false;
                 testCount++;
 
                 List<Submission> submissions = session.createQuery("FROM Submission WHERE childrenId = :childrenId " +
@@ -63,124 +71,44 @@ public class StatisticDAO {
                     boolean canGrade = true;
 
                     for (Object[] choiceObject : choiceObjects) {
+                        answerCount++;
                         Integer questionId = (Integer) choiceObject[1];
                         Integer choiceId = (Integer) choiceObject[2];
 
                         Integer answerId = questionMap.get(questionId).getAnswerId();
 
-                        if (Objects.equals(choiceId, answerId)) count++;
+                        if (Objects.equals(choiceId, answerId)) {
+                            count++;
+                            answerCorrect++;
+                        }
                     }
 
                     for (Object[] essayAnswerObject : essayAnswerObjects) {
-                        if ((Integer) essayAnswerObject[3] == 1) count++;
+                        answerCount++;
+                        if ((Integer) essayAnswerObject[3] == 1) {
+                            count++;
+                            answerCorrect++;
+                        }
                         else if ((Integer) essayAnswerObject[3] == 0) canGrade = false;
                     }
 
                     Test test = session.get(Test.class, testId);
 
                     if (canGrade && count >= test.getQuestionCountToPass()) {
-                        testPass++;
-                        break;
+                        isPass = true;
                     }
                 }
+
+                if (isPass) testPass++;
             }
 
-            listMap.put("pass", testPass);
-            listMap.put("count", testCount);
+            testStatistics.put("pass", testPass);
+            testStatistics.put("count", testCount);
 
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-            return new HashMap<>();
-        }
+            answerStatistics.put("correct", answerCorrect);
+            answerStatistics.put("count", answerCount);
 
-        return listMap;
-    }
-
-    public Map<String, Object> getAnswerStatistic(Integer id) {
-        Map<String, Object> listMap = new HashMap<>();
-        Session session;
-        Transaction transaction = null;
-
-        try {
-            session = sessionFactory.openSession();
-            transaction = session.beginTransaction();
-
-            List<Integer> testIds = session.createNativeQuery("select test_id from children_do_test " +
-                            "where children_id = :childrenId")
-                    .setParameter("childrenId", id)
-                    .getResultList();
-
-            Integer questionCount = 0, questionCorrect = 0;
-
-            for (Integer testId : testIds) {
-                List<Submission> submissions = session.createQuery("FROM Submission WHERE childrenId = :childrenId " +
-                                "AND testId = :testId", Submission.class)
-                        .setParameter("childrenId", id)
-                        .setParameter("testId", testId)
-                        .getResultList();
-
-                List<Question> questions = session.createQuery("FROM Question WHERE testId = :testId", Question.class)
-                        .setParameter("testId", testId)
-                        .getResultList();
-
-                Map<Integer, Question> questionMap = questions.stream()
-                        .collect(Collectors.toMap(Question::getId, question -> question));
-
-                for (Submission submission : submissions) {
-                    List<Object[]> choiceObjects = session.createNativeQuery("select * from choice_in_submission " +
-                                    "where submission_id = :submissionId")
-                            .setParameter("submissionId", submission.getId())
-                            .getResultList();
-
-                    List<Object[]> essayAnswerObjects = session.createNativeQuery("select * from answer_in_submission " +
-                                    "where submission_id = :submissionId")
-                            .setParameter("submissionId", submission.getId())
-                            .getResultList();
-
-                    for (Object[] choiceObject : choiceObjects) {
-                        questionCount++;
-                        Integer questionId = (Integer) choiceObject[1];
-                        Integer choiceId = (Integer) choiceObject[2];
-
-                        Integer answerId = questionMap.get(questionId).getAnswerId();
-
-                        if (Objects.equals(choiceId, answerId)) questionCorrect++;
-                    }
-
-                    for (Object[] essayAnswerObject : essayAnswerObjects) {
-                        questionCount++;
-                        if ((Integer) essayAnswerObject[3] == 1) questionCorrect++;
-                    }
-                }
-            }
-
-            listMap.put("correct", questionCorrect);
-            listMap.put("count", questionCount);
-
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            e.printStackTrace();
-            return new HashMap<>();
-        }
-
-        return listMap;
-    }
-
-    public Map<String, Object> getSubjectStatistic(Integer id) {
-        Map<String, Object> listMap = new HashMap<>();
-        Session session;
-        Transaction transaction = null;
-
-        try {
-            session = sessionFactory.openSession();
-            transaction = session.beginTransaction();
+            // Subject statistics
 
             List<Integer> submissionIds = session.createNativeQuery("select id from submission " +
                             "where children_id = :childrenId")
@@ -220,13 +148,17 @@ public class StatisticDAO {
                     if (isPass == 1) questionCorrect++;
                 }
 
-                Map<String, Object> subjectStats = new HashMap<>();
+                Map<String, Object> subjectStatistics = new HashMap<>();
 
-                subjectStats.put("correct", questionCorrect);
-                subjectStats.put("count", questionCount);
+                subjectStatistics.put("correct", questionCorrect);
+                subjectStatistics.put("count", questionCount);
 
-                listMap.put(String.valueOf(tag), subjectStats);
+                allSubjectStatistics.put(String.valueOf(tag), subjectStatistics);
             }
+
+            listMap.put("test", testStatistics);
+            listMap.put("answer", answerStatistics);
+            listMap.put("subject", allSubjectStatistics);
 
             transaction.commit();
         } catch (Exception e) {

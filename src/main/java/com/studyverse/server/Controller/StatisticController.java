@@ -20,9 +20,11 @@ public class StatisticController {
     public Map<String, Object> getStatistics(@PathVariable("id") Integer id) {
         Map<String, Object> response = new HashMap<>();
 
-        response.put("test", statisticDAO.getTestStatistic(id));
-        response.put("answer", statisticDAO.getAnswerStatistic(id));
-        response.put("subject", statisticDAO.getSubjectStatistic(id));
+        Map<String, Map<String, Object>> statistics = statisticDAO.getStatistics(id);
+
+        response.put("test", statistics.get("test"));
+        response.put("answer", statistics.get("answer"));
+        response.put("subject", statistics.get("subject"));
 
         return response;
     }
