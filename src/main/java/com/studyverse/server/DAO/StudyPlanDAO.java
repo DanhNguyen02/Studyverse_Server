@@ -38,7 +38,7 @@ public class StudyPlanDAO {
 
                 int childrenId = (Integer) row[0];
 
-                for (int subjectId = 1; subjectId <= 12; subjectId++) {
+                for (int subjectId = 1; subjectId <= 6; subjectId++) {
                     String getStudyPlansSql = "select sp.* " +
                             "from children_join_study_plan csp inner join study_plan sp " +
                             "on csp.study_plan_id = sp.id " +

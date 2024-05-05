@@ -125,7 +125,7 @@ public class StatisticDAO {
                     "q.id = qht.question_id) on ais.question_id = q.id " +
                     "where ais.submission_id in :submissionIds and qht.tag_id = :tagId";
 
-            for (int tag = 1; tag <= 12; tag++) {
+            for (int tag = 1; tag <= 6; tag++) {
                 Integer questionCount = 0, questionCorrect = 0;
 
                 List<Object[]> choiceObjects = session.createNativeQuery(choicesSql)
