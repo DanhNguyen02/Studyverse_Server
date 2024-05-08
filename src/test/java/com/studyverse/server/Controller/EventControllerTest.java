@@ -20,7 +20,6 @@ import java.util.Map;
 
 @WebMvcTest(EventController.class)
 public class EventControllerTest {
-
     @Autowired
     private MockMvc mockMvc;
 

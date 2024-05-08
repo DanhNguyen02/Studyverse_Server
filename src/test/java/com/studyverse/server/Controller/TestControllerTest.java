@@ -19,7 +19,6 @@ import java.util.Map;
 
 @WebMvcTest(TestController.class)
 public class TestControllerTest {
-
     @Autowired
     private MockMvc mockMvc;
 
