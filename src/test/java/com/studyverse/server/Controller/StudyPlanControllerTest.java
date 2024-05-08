@@ -155,4 +155,3 @@ public class StudyPlanControllerTest {
                 .andExpect(jsonPath("$.msg").value("1"));
     }
 }
-

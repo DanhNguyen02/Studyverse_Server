@@ -16,7 +16,6 @@ import static org.mockito.Mockito.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @WebMvcTest(EventController.class)
 public class EventControllerTest {
@@ -109,4 +108,3 @@ public class EventControllerTest {
                 .andExpect(jsonPath("$.msg").value("1"));
     }
 }
-
