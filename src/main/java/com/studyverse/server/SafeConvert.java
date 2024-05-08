@@ -1,5 +1,10 @@
 package com.studyverse.server;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.Map;
+
 public class SafeConvert {
     public static int safeConvertToInt(Object value) {
         if (value instanceof Integer) {
@@ -25,5 +30,10 @@ public class SafeConvert {
         } else {
             throw new IllegalArgumentException("Value cannot be converted to boolean: " + value);
         }
+    }
+
+    public static String convertMapToString(Map<String, Object> map) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(map);
     }
 }
