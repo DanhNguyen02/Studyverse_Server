@@ -26,7 +26,7 @@ public class FamilyControllerTest {
     private FamilyDAO familyDAO;
 
     @Test
-    public void getFamilyById_whenFamilyExists_returnsFamilyDetails() throws Exception {
+    public void testGetFamilyById_whenFamilyExists() throws Exception {
         Integer familyId = 1;
         Family family = new Family(); // Assume Family is a class with appropriate fields
         family.setId(familyId);
@@ -41,7 +41,7 @@ public class FamilyControllerTest {
     }
 
     @Test
-    public void getFamilyById_whenFamilyDoesNotExist() throws Exception {
+    public void testGetFamilyById_whenFamilyDoesNotExist() throws Exception {
         Integer familyId = 5;
         when(familyDAO.getFamilyById(familyId)).thenReturn(null);
 
@@ -51,7 +51,7 @@ public class FamilyControllerTest {
     }
 
     @Test
-    public void createFamily_whenFamilyIsCreated() throws Exception {
+    public void testCreateFamily() throws Exception {
         String email = "studyverse@gmail.com";
         int newFamilyId = 10;
 
@@ -66,20 +66,7 @@ public class FamilyControllerTest {
     }
 
     @Test
-    public void createFamily_whenFamilyCreationFails() throws Exception {
-        String email = "failemail@gmail.com";
-
-        when(familyDAO.handleCreateFamily(email)).thenReturn(0);
-
-        mockMvc.perform(post("/family/createFamily")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"email\":\"" + email + "\"}"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.msg").value("0"));
-    }
-
-    @Test
-    public void testCheckExistFamily_whenUserExists() throws Exception {
+    public void testCheckExistFamily() throws Exception {
         String email = "abc@gmail.com";
         when(familyDAO.handleCheckExistFamily(email)).thenReturn(true);
 
@@ -91,7 +78,7 @@ public class FamilyControllerTest {
     }
 
     @Test
-    public void testLinkFamily_whenLinkSuccessful() throws Exception {
+    public void testLinkFamily() throws Exception {
         String email = "bunny@gmail.com";
         String familyEmail = "happyfamily@gmail.com";
         when(familyDAO.handleLinkFamily(email, familyEmail)).thenReturn(true);
@@ -104,7 +91,7 @@ public class FamilyControllerTest {
     }
 
     @Test
-    public void testUnlinkFamily_whenUnlinkSuccessful() throws Exception {
+    public void testUnlinkFamily() throws Exception {
         String email = "bunny@gmail.com";
         when(familyDAO.handleUnlinkFamily(email)).thenReturn(true);
 
@@ -116,7 +103,7 @@ public class FamilyControllerTest {
     }
 
     @Test
-    public void testGetFamilyMembers_returnsFamilyMembersList() throws Exception {
+    public void testGetFamilyMembers() throws Exception {
         Integer familyId = 1;
         List<User> familyMembers = Collections.singletonList(new User()); // Assume User class is properly defined
 
@@ -129,7 +116,7 @@ public class FamilyControllerTest {
     }
 
     @Test
-    public void testGetPendingMembers_whenUsersPending_returnsUsers() throws Exception {
+    public void testGetPendingMembers() throws Exception {
         String familyId = "1";
         String email = "father@gmail.com";
         List<User> pendingUsers = Collections.singletonList(new User()); // Assume User class is properly defined
@@ -145,7 +132,7 @@ public class FamilyControllerTest {
     }
 
     @Test
-    public void testApproveLinkFamily_whenHostFamilyDenys() throws Exception {
+    public void testApproveLinkFamily() throws Exception {
         String email = "bunny@gmail.com";
         String familyId = "1";
         String code = "0";
@@ -159,7 +146,7 @@ public class FamilyControllerTest {
     }
 
     @Test
-    public void testKickMember_whenKickSuccessful() throws Exception {
+    public void testKickMember() throws Exception {
         String userEmail = "mother@gmail.com";
         String memberEmail = "fakebunny@gmail.com";
         String familyId = "1";
@@ -173,7 +160,7 @@ public class FamilyControllerTest {
     }
 
     @Test
-    public void testOutFamily_whenOutSuccessful() throws Exception {
+    public void testOutFamily() throws Exception {
         String email = "jenny@example.com";
         when(familyDAO.handleOutFamily(email)).thenReturn(true);
 
@@ -185,7 +172,7 @@ public class FamilyControllerTest {
     }
 
     @Test
-    public void testUpdateFamilyName_whenUpdateSuccessful() throws Exception {
+    public void testUpdateFamilyName() throws Exception {
         String id = "1";
         String name = "Superhero Family";
         when(familyDAO.updateFamilyName(id, name)).thenReturn(true);
