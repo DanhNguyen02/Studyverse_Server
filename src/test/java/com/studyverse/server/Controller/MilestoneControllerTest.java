@@ -30,6 +30,7 @@ public class MilestoneControllerTest {
         body.put("startDate", "21/05/2024");
         body.put("endDate", "31/07/2024");
         body.put("testId", null);
+        body.put("studyPlanId", 1);
 
         when(milestoneDAO.addMilestone(eq(body))).thenReturn(true);
 
@@ -39,7 +40,8 @@ public class MilestoneControllerTest {
             "content": "Content of Milestone 4",
             "startDate": "21/05/2024",
             "endDate": "31/07/2024",
-            "testId": null
+            "testId": null,
+            "studyPlanId": 1
         }
         """;
 
